@@ -55,38 +55,38 @@ module.exports.deletePost = async (req, res) => {
 
 
 
-module.exports.likePost = async (req, res) => {
-    try {
-        const objectId = new mongoose.Types.ObjectId(req.body.userId);
-        const post = await PostModel.findByIdAndUpdate(
-            req.params.id,
-            { $addToSet: { likers: objectId } },
-            { new: true }
-        );
-        res.status(200).send(post);
-    } catch (err) {
-        console.error("Erreur dans likePost :", err);
-        res.status(400).json({ message: "Erreur serveur", error: err.message });
-    }
-};
+// module.exports.likePost = async (req, res) => {
+//     try {
+//         const objectId = new mongoose.Types.ObjectId(req.body.userId);
+//         const post = await PostModel.findByIdAndUpdate(
+//             req.params.id,
+//             { $addToSet: { likers: objectId } },
+//             { new: true }
+//         );
+//         res.status(200).send(post);
+//     } catch (err) {
+//         console.error("Erreur dans likePost :", err);
+//         res.status(400).json({ message: "Erreur serveur", error: err.message });
+//     }
+// };
 
 
 
-//Module pour disliker un post
+// //Module pour disliker un post
 
-module.exports.dislikePost = async (req, res) => {
-    try {
-        const objectId = new mongoose.Types.ObjectId(req.body.userId);
-        const post = await PostModel.findByIdAndUpdate(
-            req.params.id,
-            { $pull: { likers: objectId } },
-            { new: true }
-        );
-        res.status(200).send(post);
-    } catch (err) {
-        console.error("Erreur dans dislikePost :", err);
-        res.status(400).json({ message: "Erreur serveur", error: err.message });
-    }
-};
+// module.exports.dislikePost = async (req, res) => {
+//     try {
+//         const objectId = new mongoose.Types.ObjectId(req.body.userId);
+//         const post = await PostModel.findByIdAndUpdate(
+//             req.params.id,
+//             { $pull: { likers: objectId } },
+//             { new: true }
+//         );
+//         res.status(200).send(post);
+//     } catch (err) {
+//         console.error("Erreur dans dislikePost :", err);
+//         res.status(400).json({ message: "Erreur serveur", error: err.message });
+//     }
+// };
 
 
