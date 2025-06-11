@@ -1,8 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const User = require('../src/models/User');
+const User = require('./src/models/User');
+require('dotenv').config();
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 const app = express();
+app.use(express.json());
+
 const PORT = process.env.PORT || 4001;
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy');
@@ -19,6 +23,8 @@ app.get('/profile/:username', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.use('/auth', require('./src/routes/auth'));
 
 app.listen(PORT, () => {
   console.log(`publicProfile service running on port ${PORT}`);

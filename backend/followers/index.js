@@ -1,7 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const Follower = require('../src/models/Follower');
-const User = require('../src/models/User');
+const Follower = require('./src/models/Follower');
+const User = require('./src/models/User');
+require('dotenv').config();
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 const app = express();
 app.use(express.json());
@@ -44,6 +46,8 @@ app.get('/following/:followerId', async (req, res) => {
     res.status(500).json({ message: "Erreur serveur." });
   }
 });
+
+app.use("/auth", require("./src/routes/auth")); // <-- cette ligne est importante
 
 app.listen(PORT, () => {
   console.log(`followers service running on port ${PORT}`);

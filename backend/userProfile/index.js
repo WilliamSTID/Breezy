@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const Post = require('../src/models/Post');
+const Post = require('./src/models/Post');
+require('dotenv').config();
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 const app = express();
 app.use(express.json());
@@ -47,6 +49,8 @@ app.post('/profile/:userId/posts', async (req, res) => {
     res.status(500).json({ message: "Erreur serveur." });
   }
 });
+
+app.use("/auth", require("./src/routes/auth")); 
 
 app.listen(PORT, () => {
   console.log(`userProfile service running on port ${PORT}`);
