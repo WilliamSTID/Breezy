@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const User = require('../src/models/User');
+const User = require('../../followers/src/models/User');
 
 const app = express();
 const PORT = process.env.PORT || 4001;
