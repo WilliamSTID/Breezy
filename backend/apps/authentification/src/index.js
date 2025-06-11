@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5050;
 // Middlewares
 app.use(cors());
 app.use(express.json());
-const authRoutes = require("./routes/auth");
+const authRoutes = require("./routes/auth.routes.js");
 app.use("/api/auth", authRoutes);
 
 // MongoDB connection

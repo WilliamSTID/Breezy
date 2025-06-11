@@ -6,8 +6,7 @@ const auth = (req, res, next) => {
 
     if (!token) return res.status(401).json({ message: "Accès refusé. Aucun token fourni." });
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
 
     next();
   } catch (err) {
@@ -17,7 +16,7 @@ const auth = (req, res, next) => {
 
 module.exports = auth;  
 
-const authMiddleware = require("../middlewares/auth");
+const authMiddleware = require("../middlewares/auth.controller.js");
 
 router.get("/me", authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
