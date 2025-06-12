@@ -6,7 +6,7 @@ const  NOMBRE_COMPTE_A_CREER = 50
 
 // Connexion à MongoDB
 mongoose
-    .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/followers')
+    .connect(process.env.MONGO_URI || 'mongodb://localhost:2702 7/breezy')
     .then(() => {
         console.log("Connecté à MongoDB !");
         genererComptes(NOMBRE_COMPTE_A_CREER); // Exemple : Génère 10 comptes

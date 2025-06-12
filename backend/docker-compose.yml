@@ -1,0 +1,42 @@
+services:
+  mongo:
+    image: mongo:6
+    container_name: breezy-mongo
+    restart: always
+    ports:
+      - "27027:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  followers:
+    build: ./apps/followers
+    container_name: followers
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/breezy
+    depends_on:
+      - mongo
+    ports:
+      - "4002:4002"
+
+  publicprofile:
+    build: ./apps/publicProfile
+    container_name: publicprofile
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/breezy
+    depends_on:
+      - mongo
+    ports:
+      - "4001:4001"
+
+  userprofile:
+    build: ./apps/userProfile
+    container_name: userprofile
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/breezy
+    depends_on:
+      - mongo
+    ports:
+      - "4003:4003"
+
+volumes:
+  mongo-data:

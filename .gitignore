@@ -1,7 +1,7 @@
 .env
+node_modules/
 ...existing code...
 package-lock.json
-...existing code...
 node_modules/.package-lock.json
 node_modules/.bin/nodemon
 node_modules/.bin/nodemon.cmd

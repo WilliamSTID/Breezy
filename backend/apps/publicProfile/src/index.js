@@ -1,25 +1,22 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const User = require('../../followers/src/models/User');
+const routes = require('./routes/publicProfile.routes');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 4001;
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/', routes);
 
-app.get('/profile/:username', async (req, res) => {
-  try {
-    const user = await User.findOne(
-      { username: req.params.username },
-      'username bio avatar createdAt updatedAt'
-    );
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`publicProfile service running on port ${PORT}`);
-});
+mongoose
+    .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`publicProfile service running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Erreur lors de la connexion à MongoDB :', err);
+    });
