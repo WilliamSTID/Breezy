@@ -3,5 +3,8 @@
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.8.0"
   }
 }
