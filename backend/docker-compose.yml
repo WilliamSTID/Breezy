@@ -58,6 +58,16 @@ services:
       - mongo
     ports:
       - "4005:4005"
+  
+  post:
+    build: ./apps/post
+    container_name: post
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/breezy
+    depends_on:
+      - mongo
+    ports:
+      - "4006:4006"
 
   nginx:
     image: nginx:alpine
@@ -71,6 +81,8 @@ services:
       - publicprofile
       - userprofile
       - useraccount
+      - authentication
+      - post
 
 volumes:
   mongo-data:

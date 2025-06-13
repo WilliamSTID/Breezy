@@ -1,27 +1,25 @@
 const express=require("express");
-
 const dotenv=require("dotenv");
+const mongoose=require('mongoose');
 const applyMiddlewares = require("./middlewares/post.middlewares");
 dotenv.config();
-const connectDB = require("../../../post.db.js");
 const app=express();
-const port=3000;
-
-
-
-//renseigner au seveur la connexion à la BDD MongoDB
-connectDB();
+const PORT = process.env.PORT||4006;
 
 // Application des middlewares
 applyMiddlewares(app);
 
-
-
 //spécification des routes à aller récupérer
 app.use("/post",require("./routes/post.routes"));
 
-
-
-//lancement du serveur
-app.listen(port,()=>console.log(`Serveur lancé sur port ${port}`));
-
+//connexion avec la BDD mongoD via la bibliothèque Mongoose
+mongoose
+    .connect( process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`post service running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Erreur lors de la connexion à MongoDB :', err);
+    });
