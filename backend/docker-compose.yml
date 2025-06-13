@@ -43,13 +43,13 @@ services:
     container_name: post
     environment:
       - MONGO_URI=mongodb://mongo:27017/post
+      - PORT=3000
     depends_on:
       - mongo
     ports:
       - "3000:3000"
-    volumes:
-      - ./backend/apps/post:/app
-      - /app/node_modules
+    
+  
 
   nginx:
     image: nginx:alpine
@@ -62,6 +62,7 @@ services:
       - followers
       - publicprofile
       - userprofile
+      - post
 
 volumes:
   mongo-data:
