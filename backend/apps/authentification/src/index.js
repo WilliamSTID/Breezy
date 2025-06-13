@@ -1,5 +1,3 @@
-// src/index.js
-
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -16,17 +14,19 @@ const authRoutes = require("./routes/auth.routes.js");
 app.use("/api/auth", authRoutes);
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
-
-.then(() => console.log("MongoDB connecté"))
-.catch((err) => console.error("Erreur MongoDB :", err));
+mongoose
+    .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
+    .then(() => {
+      console.log("MongoDB connecté")
+      app.listen(PORT, () => {
+        console.log(`authentification service running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Erreur lors de la connexion à MongoDB :', err);
+    })
 
 // Test route
 app.get("/", (req, res) => {
   res.send("Breezy API is running 🌀");
-});
-
-// Lancement du serveur
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
 });

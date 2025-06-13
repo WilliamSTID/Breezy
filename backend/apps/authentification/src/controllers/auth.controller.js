@@ -16,7 +16,7 @@ const auth = (req, res, next) => {
 
 module.exports = auth;  
 
-const authMiddleware = require("../middlewares/auth.controller.js");
+const authMiddleware = require("./auth.controller.js");
 
 router.get("/me", authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
