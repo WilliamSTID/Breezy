@@ -12,4 +12,4 @@ app.use('/auth', require('./src/routes/auth'));
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`userAccount service running on port ${PORT}`);
-});
+}); 
