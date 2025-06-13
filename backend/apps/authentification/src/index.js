@@ -1,18 +1,18 @@
+// apps/authentification/src/index.js
+
 const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
 require('dotenv').config();
 
-// App setup
 const app = express();
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 4000;
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
-const authRoutes = require("./routes/auth.routes.js");
-app.use("/api/auth", authRoutes);
+// Middleware uniquement pour test ici
+const verifyToken = require("./middlewares/auth.middlewares");
 
+// Route protégée de test
+app.get("/api/protected", verifyToken, (req, res) => {
+  res.json({ message: "✅ Accès autorisé", user: req.user });
+});
 // MongoDB connection
 mongoose
     .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
@@ -26,7 +26,8 @@ mongoose
       console.error('Erreur lors de la connexion à MongoDB :', err);
     })
 
-// Test route
+// Route de santé
 app.get("/", (req, res) => {
-  res.send("Breezy API is running 🌀");
+  res.send("🔐 Microservice authentification actif");
 });
+
