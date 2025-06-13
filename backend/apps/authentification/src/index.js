@@ -13,12 +13,21 @@ const verifyToken = require("./middlewares/auth.middlewares");
 app.get("/api/protected", verifyToken, (req, res) => {
   res.json({ message: "✅ Accès autorisé", user: req.user });
 });
+// MongoDB connection
+mongoose
+    .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
+    .then(() => {
+      console.log("MongoDB connecté")
+      app.listen(PORT, () => {
+        console.log(`authentification service running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Erreur lors de la connexion à MongoDB :', err);
+    })
 
 // Route de santé
 app.get("/", (req, res) => {
   res.send("🔐 Microservice authentification actif");
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 authentification lancé sur http://localhost:${PORT}`);
-});
