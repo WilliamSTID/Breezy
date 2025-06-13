@@ -39,7 +39,7 @@ services:
       - "4003:4003"
   
   useraccount:
-    build: ./userAccount
+    build: ./apps/userAccount
     container_name: useraccount
     environment:
       - MONGO_URI=mongodb://mongo:27017/breezy
@@ -47,6 +47,17 @@ services:
       - mongo
     ports:
       - "4004:4004"
+
+
+  authentication:
+    build: ./apps/authentification
+    container_name: authentification
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/breezy
+    depends_on:
+      - mongo
+    ports:
+      - "4005:4005"
 
   nginx:
     image: nginx:alpine
