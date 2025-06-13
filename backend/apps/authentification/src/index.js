@@ -4,7 +4,7 @@ const express = require('express');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4005;
 
 // Middleware uniquement pour test ici
 const verifyToken = require("./middlewares/auth.middlewares");
