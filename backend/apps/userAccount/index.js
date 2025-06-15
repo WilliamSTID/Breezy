@@ -7,9 +7,10 @@ app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy');
 
-app.use('/auth', require('./src/routes/auth'));
+const authRoutes = require('./src/routes/auth');
+app.use('/', authRoutes);
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4004;
 app.listen(PORT, () => {
   console.log(`userAccount service running on port ${PORT}`);
-}); 
+});
