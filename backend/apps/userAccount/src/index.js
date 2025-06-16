@@ -7,7 +7,7 @@ app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy');
 
-const authRoutes = require('./src/routes/auth');
+const authRoutes = require('./routes/auth');
 app.use('/', authRoutes);
 
 const PORT = process.env.PORT || 4004;
