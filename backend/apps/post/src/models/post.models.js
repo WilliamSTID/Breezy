@@ -10,15 +10,11 @@ const postSchema=mongoose.Schema(
             trim:true,
         },
         author:{ 
-            type:String,
-          //  ref:"User", //Référence à l'utilisateur qui a créé le post
+            type:mongoose.Schema.Types.ObjectId, //Type d'identifiant pour l'auteur du post
+            ref:"User", //Référence à l'utilisateur qui a créé le post
             required:true,
         },
-        likers:{
-      type: [mongoose.Schema.Types.ObjectId],
-     // ref: "User",
-      default: [],
-    },
+       
     createdAt: {
       type: Date,
       default: Date.now,

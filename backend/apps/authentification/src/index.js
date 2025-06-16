@@ -14,6 +14,7 @@ app.get("/api/protected", verifyToken, (req, res) => {
   res.json({ message: "✅ Accès autorisé", user: req.user });
 });
 // MongoDB connection
+
 mongoose
     .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
     .then(() => {

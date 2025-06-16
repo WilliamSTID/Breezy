@@ -48,7 +48,6 @@ services:
     ports:
       - "4004:4004"
 
-
   authentication:
     build: ./apps/authentification
     container_name: authentification
@@ -69,37 +68,6 @@ services:
     ports:
       - "4006:4006"
 
-  post:
-    build: ./apps/post
-    container_name: post
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/post
-      - PORT=3000
-    depends_on:
-      - mongo
-    ports:
-      - "3000:3000"
-    
-  
-#  useraccount:
-#    build: ./apps/userAccount
-#    container_name: useraccount
-#    environment:
-#      - MONGO_URI=mongodb://mongo:27017/breezy
-#    depends_on:
-#      - mongo
-#    ports:
-#      - "4004:4004"
-
-  authentication:
-    build: ./apps/authentification
-    container_name: authentification
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
-    depends_on:
-      - mongo
-    ports:
-      - "4005:4005"
 
   nginx:
     image: nginx:alpine
@@ -119,4 +87,3 @@ services:
 
 volumes:
   mongo-data:
-
