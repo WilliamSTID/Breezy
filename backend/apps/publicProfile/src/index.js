@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const routes = require('./routes/publicProfile.routes');
+const publicProfileRoutes = require('./routes/publicProfile.routes');
 require('dotenv').config();
 
 const app = express();
@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 4001;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/', routes);
+app.use('/', publicProfileRoutes);
 
 mongoose
     .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')

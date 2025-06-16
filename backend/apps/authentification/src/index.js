@@ -7,7 +7,7 @@ require('dotenv').config();
 
 // App setup
 const app = express();
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 4005;
 
 // Middlewares
 app.use(cors());
@@ -17,9 +17,8 @@ app.use("/api/auth", authRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
-
-.then(() => console.log("MongoDB connecté"))
-.catch((err) => console.error("Erreur MongoDB :", err));
+  .then(() => console.log("MongoDB connecté"))
+  .catch((err) => console.error("Erreur MongoDB :", err));
 
 // Test route
 app.get("/", (req, res) => {

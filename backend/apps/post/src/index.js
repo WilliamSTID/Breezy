@@ -4,13 +4,14 @@ const mongoose=require('mongoose');
 const applyMiddlewares = require("./middlewares/post.middlewares");
 dotenv.config();
 const app=express();
-const PORT = process.env.PORT||3000;
+const PORT = process.env.PORT||4006;
+
 
 // Application des middlewares
 applyMiddlewares(app);
 
 //spécification des routes à aller récupérer
-app.use("/post",require("./routes/post.routes"));
+app.use("/posts", require("./routes/post.routes"));
 
 //connexion avec la BDD mongoD via la bibliothèque Mongoose
 mongoose
