@@ -49,7 +49,7 @@ services:
       - "4004:4004"
 
 
-  authentication:
+  authentification:
     build: ./apps/authentification
     container_name: authentification
     environment:
@@ -101,8 +101,23 @@ services:
       - publicprofile
       - userprofile
       - useraccount
-      - authentication
+      - authentification
       - post
+
+  gateway:
+    build: ./apps/gateway
+    container_name: gateway
+    ports:
+      - "4000:4000"
+    depends_on:
+      - followers
+      - publicprofile
+      - userprofile
+      - useraccount
+      - authentification
+      - post
+      - interaction
+      - feed
 
 volumes:
   mongo-data:
