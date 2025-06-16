@@ -5,5 +5,5 @@ COPY . ./
 
 RUN npm install
 
-EXPOSE 4001
+EXPOSE 4005
 CMD ["node", "src/index.js"]
