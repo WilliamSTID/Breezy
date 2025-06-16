@@ -6,10 +6,14 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware uniquement pour test ici
+// Middlewares
 const verifyToken = require("./middlewares/auth.middlewares");
 
-// Route protégée de test
+// Routes
+const authCheckRoutes = require("./routes/authCheck.routes");
+app.use("/api/authcheck", authCheckRoutes);
+
+// Exemple de route protégée (utilise le middleware directement)
 app.get("/api/protected", verifyToken, (req, res) => {
   res.json({ message: "✅ Accès autorisé", user: req.user });
 });
@@ -19,6 +23,7 @@ app.get("/", (req, res) => {
   res.send("🔐 Microservice authentification actif");
 });
 
+// Lancement du serveur
 app.listen(PORT, () => {
   console.log(`🚀 authentification lancé sur http://localhost:${PORT}`);
 });

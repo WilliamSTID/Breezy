@@ -18,8 +18,8 @@ app.use("/api/auth", authRoutes);
 
 // Connexion à MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connecté (userAccount)"))
-  .catch((err) => console.error("❌ Erreur MongoDB :", err));
+  .then(() => console.log("MongoDB connecté (userAccount)"))
+  .catch((err) => console.error("Erreur MongoDB :", err));
 
 // Route de test
 app.get("/", (req, res) => {
