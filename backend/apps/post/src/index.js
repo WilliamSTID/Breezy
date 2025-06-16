@@ -6,7 +6,6 @@ dotenv.config();
 const app=express();
 const PORT = process.env.PORT||4006;
 
-
 // Application des middlewares
 applyMiddlewares(app);
 

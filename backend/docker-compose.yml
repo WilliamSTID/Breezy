@@ -48,7 +48,6 @@ services:
     ports:
       - "4004:4004"
 
-
   authentication:
     build: ./apps/authentification
     container_name: authentification
@@ -69,6 +68,7 @@ services:
     ports:
       - "4006:4006"
 
+
   nginx:
     image: nginx:alpine
     container_name: breezy-nginx
@@ -83,6 +83,7 @@ services:
       - useraccount
       - authentication
       - post
+
 
 volumes:
   mongo-data:
