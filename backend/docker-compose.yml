@@ -1,54 +1,92 @@
+version: '3.8'
+
 services:
   mongo:
-    image: mongo:6
+    image: mongo
     container_name: breezy-mongo
-    restart: always
     ports:
-      - "27027:27017"
+      - "27018:27017"
     volumes:
       - mongo-data:/data/db
 
-  followers:
-    build: ./apps/followers
-    container_name: followers
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+  post:
+    build: ./apps/post
+    ports:
+      - "3000:3000"
     depends_on:
       - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/post
+    volumes:
+      - ./apps/post:/app
+      - /app/node_modules
+    restart: always
+
+  useraccount:
+    build: ./apps/userAccount
     ports:
-      - "4002:4002"
+      - "5051:5050"
+    env_file:
+      - ./apps/userAccount/.env
+    depends_on:
+      - mongo
+    volumes:
+      - ./apps/userAccount:/app
+      - /app/node_modules
+    restart: always
+
+  authentification:
+    build: ./apps/authentification
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./apps/authentification/.env
+    depends_on:
+      - mongo
+    volumes:
+      - ./apps/authentification:/app
+      - /app/node_modules
+    restart: always
 
   publicprofile:
     build: ./apps/publicProfile
-    container_name: publicprofile
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+    ports:
+      - "3001:3001"
     depends_on:
       - mongo
-    ports:
-      - "4001:4001"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/publicprofile
+    volumes:
+      - ./apps/publicProfile:/app
+      - /app/node_modules
+    restart: always
 
   userprofile:
     build: ./apps/userProfile
-    container_name: userprofile
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+    ports:
+      - "4002:4002"
+    env_file:
+      - ./apps/userProfile/.env
     depends_on:
       - mongo
-    ports:
-      - "4003:4003"
+    volumes:
+      - ./apps/userProfile:/app
+      - /app/node_modules
+    restart: always
 
   nginx:
-    image: nginx:alpine
-    container_name: breezy-nginx
+    image: nginx:latest
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../frontend:/usr/share/nginx/html
     depends_on:
-      - followers
-      - publicprofile
       - userprofile
+      - publicprofile
+      - useraccount
+      - authentification
+    restart: always
 
 volumes:
   mongo-data:
