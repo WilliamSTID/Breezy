@@ -68,6 +68,26 @@ services:
       - mongo
     ports:
       - "4006:4006"
+  
+  interaction:
+    build: ./apps/interaction
+    container_name: interaction
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/breezy
+    depends_on:
+      - mongo
+    ports:
+      - "4007:4007"
+
+  feed:
+    build: ./apps/feed
+    container_name: feed
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/breezy
+    depends_on:
+      - mongo
+    ports:
+      - "4008:4008"
 
   nginx:
     image: nginx:alpine

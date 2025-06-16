@@ -11,5 +11,5 @@ router.put("/:id",editPost);
 
 router.delete("/:id", deletePost);
 
-module.exports = router;
+module.exports = router; 
 

@@ -6,4 +6,4 @@ const FollowerSchema = new mongoose.Schema({
   follower: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } // celui qui suit
 }, { timestamps: true });
 
-module.exports = mongoose.model('Follower', FollowerSchema);
+module.exports = mongoose.model('Follower', FollowerSchema); 

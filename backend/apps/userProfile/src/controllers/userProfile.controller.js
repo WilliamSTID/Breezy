@@ -10,7 +10,7 @@ module.exports = {
         } catch (err) {
             res.status(500).json({ message: "Erreur serveur." });
         }
-    },
+    }, 
 
 // Modifier un de ses messages
     modifyUserPost: async (req, res) => {

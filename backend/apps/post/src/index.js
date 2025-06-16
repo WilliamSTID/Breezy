@@ -22,4 +22,4 @@ mongoose
     })
     .catch((err) => {
       console.error('Erreur lors de la connexion à MongoDB :', err);
-    });
+    }); 

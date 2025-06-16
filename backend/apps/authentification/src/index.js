@@ -28,4 +28,4 @@ app.get("/", (req, res) => {
 // Lancement du serveur
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
-});
+}); 

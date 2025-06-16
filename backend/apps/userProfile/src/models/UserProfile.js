@@ -6,4 +6,4 @@ const UserProfileSchema = new mongoose.Schema({
   // Ajoute d'autres champs selon ton besoin
 });
 
-module.exports = mongoose.model('UserProfile', UserProfileSchema);
+module.exports = mongoose.model('UserProfile', UserProfileSchema); 

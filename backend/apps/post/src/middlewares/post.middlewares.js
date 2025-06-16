@@ -6,4 +6,4 @@ const applyMiddlewares = (app) => {
   app.use(express.urlencoded({ extended: false }));
 };
 
-module.exports = applyMiddlewares;
+module.exports = applyMiddlewares; 

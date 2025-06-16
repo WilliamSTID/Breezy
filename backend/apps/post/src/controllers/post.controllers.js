@@ -22,7 +22,7 @@ module.exports.setPosts=async(req,res)=>{
         message:req.body.message,
         author:req.body.author,
 
-    })
+    }) 
     res.status(200).json(post);
 };
 

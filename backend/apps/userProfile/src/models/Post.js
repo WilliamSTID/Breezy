@@ -8,4 +8,4 @@ const PostSchema = new mongoose.Schema({
   videos: [{ type: String }], // Tableau d'URL de vidéos
 }, { timestamps: true });
 
-module.exports = mongoose.model('Post', PostSchema);
+module.exports = mongoose.model('Post', PostSchema); 
