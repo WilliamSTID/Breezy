@@ -14,8 +14,7 @@ app.use('/', authRoutes);
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use(express.json());
- 
+
 // Route de test
 app.get("/", (req, res) => {
   res.send("🧩 Microservice userAccount en ligne");
