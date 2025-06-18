@@ -1,4 +1,6 @@
 const express=require("express");
+require('./libs/loadEnv')();
+
 const dotenv=require("dotenv");
 const mongoose=require('mongoose');
 const applyMiddlewares = require("./middlewares/post.middlewares");
@@ -6,12 +8,15 @@ dotenv.config();
 const app=express();
 const PORT = process.env.PORT||4006;
 
-
 // Application des middlewares
 applyMiddlewares(app);
 
 //spécification des routes à aller récupérer
 app.use("/posts", require("./routes/post.routes"));
+
+app.get('posts/api/token', (req, res) => {
+    res.json({ message: process.env.TEST_POST_ENV});
+});
 
 //connexion avec la BDD mongoD via la bibliothèque Mongoose
 mongoose
