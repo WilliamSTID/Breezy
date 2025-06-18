@@ -7,7 +7,6 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     console.log(req.body);
-
     const { username, email, password } = req.body;
     const user = new User({ username, email, password });
     await user.save();
@@ -17,19 +16,29 @@ router.post('/register', async (req, res) => {
   }
 });
 
+router.get('/api/token', (req, res) => {
+  res.json({ message: process.env.PORT_TEST_TEST});
+});
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!req.body.email || !req.body.password) {
       return res.status(400).json({ error: 'Email and password required' });
     }
-    const user = await User.findOne({ email });
+      const user = await User.findOne({ email });
+
     if (!user || !(await user.comparePassword(password)))
       return res.status(401).json({ error: 'Identifiants invalides' });
+    console.log(process.env.JWT_SECRET);
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
     res.json({ token, userId: user._id });
-  } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur' });
+  }
+
+  catch (err) {
+    res.status(500).json({ error: 'Erreur serveur',  err: err.message });
   }
 });
 

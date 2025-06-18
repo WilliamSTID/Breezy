@@ -1,3 +1,4 @@
+require('./libs/loadEnv')();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -7,14 +8,14 @@ const app = express();
 
 const PORT = process.env.PORT || 4004;
 
-const authRoutes = require('./routes/auth');
-app.use('/', authRoutes);
-
- 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
+const authRoutes = require('./routes/auth');
+app.use('/', authRoutes);
+
+ 
 // Route de test
 app.get("/", (req, res) => {
   res.send("🧩 Microservice userAccount en ligne");

@@ -5,13 +5,12 @@ FROM node:18
 WORKDIR /app
 
 # Copier les fichiers de configuration et d'installation
-COPY package*.json ./
+COPY . ./
+COPY ../../.env /app/global.env
+
 RUN npm install
 
-COPY . .
-
-# Expose le port (à adapter si différent)
-EXPOSE 3000
+EXPOSE 4006
 
 # Lancer le serveur
 CMD ["node", "src/index.js"]
