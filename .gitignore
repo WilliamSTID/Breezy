@@ -1,3 +1,6 @@
 .env
 node_modules/
 .idea
+.env.*
+apps/*/.env
+apps/*/.env.*

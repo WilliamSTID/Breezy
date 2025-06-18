@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
-const User = require("../apps/authentification/src/models/User"); // Ajuste le chemin si besoin
-const {faker} = require('@faker-js/faker');
+const User = require("../apps/userAccount/src/models/user.js");
+const { faker } = require('@faker-js/faker');
 
 const  NOMBRE_COMPTE_A_CREER = 50
 
 // Connexion à MongoDB
 mongoose
-    .connect(process.env.MONGO_URI || 'mongodb://localhost:2702 7/breezy')
+    .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
     .then(() => {
         console.log("Connecté à MongoDB !");
         genererComptes(NOMBRE_COMPTE_A_CREER); // Exemple : Génère 10 comptes
@@ -18,10 +18,10 @@ async function genererComptes(nombre) {
   for (let i = 0; i < nombre; i++) {
     const user = new User({
       username: faker.internet.username(),
-      email: faker.internet.email(),
-      password: faker.internet.password(8), // Minimum 8 caractères
-      bio: faker.lorem.sentence(),
-      avatar: faker.image.avatar()
+      email:    faker.internet.email(),
+      password: faker.internet.password(8)   // min-length 8
+      // bio:      faker.lorem.sentence(),
+      // avatar:   faker.image.avatar()
     });
 
     try {
