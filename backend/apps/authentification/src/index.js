@@ -1,31 +1,63 @@
-// src/index.js
-
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
-require('dotenv').config();
+const authService = require('./authService');
 
-// App setup
 const app = express();
 const PORT = process.env.PORT || 4005;
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
-const authRoutes = require("./routes/auth.routes.js");
-app.use("/api/auth", authRoutes);
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connecté"))
-  .catch((err) => console.error("Erreur MongoDB :", err));
+// Middleware d'authentification pour les routes protégées
+const authMiddleware = (req, res, next) => {
+  authService.authenticateToken(req, res, next);
+};
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("Breezy API is running 🌀");
+// Routes protégées
+app.get('/verify', authMiddleware, (req, res) => {
+  res.status(200).json({ message: 'Token valide', user: req.user });
 });
 
-// Lancement du serveur
+// Routes de base
+app.get('/', (req, res) => {
+  res.send('Service d\'authentification opérationnel');
+});
+
+// Routes d'authentification (non protégées)
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const result = await authService.login(email, password);
+    
+    if (!result.success) {
+      return res.status(401).json({ message: result.message });
+    }
+    
+    res.status(200).json(result.data);
+  } catch (error) {
+    console.error('Erreur de connexion:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur' });
+  }
+});
+
+app.post('/register', async (req, res) => {
+  try {
+    const { email, password, username } = req.body;
+    const result = await authService.register(email, password, username);
+    
+    if (!result.success) {
+      return res.status(400).json({ message: result.message });
+    }
+    
+    res.status(201).json(result.data);
+  } catch (error) {
+    console.error('Erreur d\'inscription:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur' });
+  }
+});
+
+// Démarrage du serveur
 app.listen(PORT, () => {
-  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
-}); 
+  console.log(`Service d'authentification démarré sur le port ${PORT}`);
+});

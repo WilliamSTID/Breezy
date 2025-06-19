@@ -1,9 +1,9 @@
 FROM node:20
 
 WORKDIR /app
-COPY . ./
+COPY . .
 
-RUN npm install
+RUN npm install dotenv && npm install
 
 EXPOSE 4005
 CMD ["node", "src/index.js"]

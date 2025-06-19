@@ -1,9 +1,9 @@
 FROM node:20
 
 WORKDIR /app
-COPY . ./
+COPY . .
 
 RUN npm install
 
-EXPOSE 4008
+EXPOSE 4007
 CMD ["node", "src/index.js"]

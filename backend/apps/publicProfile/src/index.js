@@ -1,22 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const publicProfileRoutes = require('./routes/publicProfile.routes');
-require('dotenv').config();
-
+const userRoutes = require('./routes/user.routes');
 const app = express();
-const PORT = process.env.PORT || 4001;
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use('/', publicProfileRoutes);
+app.use('/api/users', userRoutes);
 
-mongoose
-    .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
-    .then(() => {
-      app.listen(PORT, () => {
-        console.log(`publicProfile service running on port ${PORT}`);
-      });
-    })
-    .catch((err) => {
-      console.error('Erreur lors de la connexion à MongoDB :', err);
-    });
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+  console.log('MongoDB connecté');
+  app.listen(4001, () => {
+    console.log('publicProfile service running on port 4001');
+  });
+})
+.catch(err => {
+  console.error('Erreur de connexion MongoDB', err);
+});

@@ -1,11 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const routes = require('./routes/interaction.routes');
-
+const userRoutes = require('./routes/user.routes');
 const app = express();
-app.use(express.json());
-app.use('/interaction', routes);
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
-  .then(() => app.listen(4007, () => console.log('interaction service running on port 4007')))
-  .catch(err => console.error(err));
+app.use(express.json());
+app.use('/api/users', userRoutes);
+
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+  console.log('MongoDB connecté');
+  app.listen(4007, () => {
+    console.log('interaction service running on port 4007');
+  });
+})
+.catch(err => {
+  console.error('Erreur de connexion MongoDB', err);
+});

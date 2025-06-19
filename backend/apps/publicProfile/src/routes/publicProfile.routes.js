@@ -1,7 +1,8 @@
 const express = require('express');
-const router = express.Router();
+const authenticateToken = require('../../../libs/auth/authenticateToken');
 const pulbicProfileController = require('../controllers/publicProfile.controller.js');
 const User = require('../models/User');
+const router = express.Router();
 
 router.get('/profile/:username', pulbicProfileController.getUserAccountInformation);
 router.get('/publicprofiles', async (req, res) => {
@@ -12,5 +13,9 @@ router.get('/publicprofiles', async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
+router.get('/', authenticateToken, async (req, res) => {
+  const users = await User.find({}, { username: 1, _id: 0 });
+  res.json(users);
+});
 
-module.exports = router; 
+module.exports = router;

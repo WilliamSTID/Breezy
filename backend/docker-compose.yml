@@ -1,5 +1,5 @@
 services:
-  mongo:
+  breezy-mongo:
     image: mongo:6
     container_name: breezy-mongo
     restart: always
@@ -9,83 +9,101 @@ services:
       - mongo-data:/data/db
 
   followers:
-    build: ./apps/followers
+    build:
+      context: ./apps/followers
     container_name: followers
     environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+      - MONGO_URI=mongodb://breezy-mongo:27017/breezy
     depends_on:
-      - mongo
+      - breezy-mongo
     ports:
       - "4002:4002"
 
   publicprofile:
-    build: ./apps/publicProfile
+    build:
+      context: ./apps/publicprofile
+      dockerfile: Dockerfile
     container_name: publicprofile
     environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+      - MONGO_URI=mongodb://breezy-mongo:27017/breezy
     depends_on:
-      - mongo
+      - breezy-mongo
     ports:
       - "4001:4001"
 
   userprofile:
-    build: ./apps/userProfile
+    build:
+      context: ./apps/userprofile
+      dockerfile: Dockerfile
     container_name: userprofile
     environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+      - MONGO_URI=mongodb://breezy-mongo:27017/breezy
+      - JWT_SECRET=super_secret_token_breezy
     depends_on:
-      - mongo
+      - breezy-mongo
     ports:
       - "4003:4003"
-  
+
   useraccount:
-    build: ./apps/userAccount
+    build:
+      context: ./apps/useraccount
+      dockerfile: Dockerfile
     container_name: useraccount
     environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+      - MONGO_URI=mongodb://breezy-mongo:27017/breezy
     depends_on:
-      - mongo
+      - breezy-mongo
     ports:
       - "4004:4004"
-
+    volumes:
+      - ./libs:/app/libs
 
   authentification:
-    build: ./apps/authentification
+    build:
+      context: ./apps/authentification
+      dockerfile: Dockerfile
     container_name: authentification
     environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+      - MONGO_URI=mongodb://breezy-mongo:27017/breezy
+      - JWT_SECRET=super_secret_token_breezy
     depends_on:
-      - mongo
+      - breezy-mongo
     ports:
       - "4005:4005"
   
   post:
-    build: ./apps/post
+    build:
+      context: ./apps/post
+      dockerfile: Dockerfile
     container_name: post
     environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+      - MONGO_URI=mongodb://breezy-mongo:27017/breezy
     depends_on:
-      - mongo
+      - breezy-mongo
     ports:
       - "4006:4006"
-  
+
   interaction:
-    build: ./apps/interaction
+    build:
+      context: ./apps/interaction
+      dockerfile: Dockerfile
     container_name: interaction
     environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+      - MONGO_URI=mongodb://breezy-mongo:27017/breezy
     depends_on:
-      - mongo
+      - breezy-mongo
     ports:
       - "4007:4007"
 
   feed:
-    build: ./apps/feed
+    build:
+      context: ./apps/feed
+      dockerfile: Dockerfile
     container_name: feed
     environment:
-      - MONGO_URI=mongodb://mongo:27017/breezy
+      - MONGO_URI=mongodb://breezy-mongo:27017/breezy
     depends_on:
-      - mongo
+      - breezy-mongo
     ports:
       - "4008:4008"
 
@@ -105,7 +123,9 @@ services:
       - post
 
   gateway:
-    build: ./apps/gateway
+    build:
+      context: ./apps/gateway
+      dockerfile: Dockerfile
     container_name: gateway
     ports:
       - "4000:4000"

@@ -1,16 +1,21 @@
 const express = require('express');
 const mongoose = require('mongoose');
-require('dotenv').config();
+const cors = require('cors');
+const authRoutes = require('./routes/auth');
 
 const app = express();
+const PORT = process.env.PORT || 4004;
+
+app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy');
-
-const authRoutes = require('./routes/auth');
+// Renommer la route pour éviter la confusion
 app.use('/', authRoutes);
 
-const PORT = process.env.PORT || 4004;
+mongoose.connect('mongodb://breezy-mongo:27017/breezy')
+  .then(() => console.log('MongoDB connecté'))
+  .catch(err => console.error('MongoDB connexion error:', err));
+
 app.listen(PORT, () => {
   console.log(`userAccount service running on port ${PORT}`);
-}); 
+});
