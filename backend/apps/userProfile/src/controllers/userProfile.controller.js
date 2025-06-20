@@ -1,14 +1,18 @@
-const Post = require("../models/Post");
+const Post = require('../models/Post'); // Ajoute cette ligne
+const axios = require('axios');
 
 module.exports = {
 
 // Récupérer les messages d'un utilisateur
     getUserPosts: async (req, res) => {
+        const userId = req.params.userId;
         try {
-            const posts = await Post.find({ author: req.params.userId }).sort({ createdAt: -1 });
-            res.json(posts);
+            // Appel au microservice post (adapte le port si besoin)
+            const response = await axios.get(`http://post:4006/api/posts/user/${userId}`);
+            res.json(response.data);
         } catch (err) {
-            res.status(500).json({ message: "Erreur serveur." });
+            console.error(err.message);
+            res.status(500).json({ message: "Erreur lors de la récupération des posts." });
         }
     }, 
 
@@ -23,7 +27,7 @@ module.exports = {
         if (!post) return res.status(404).json({ message: "Post non trouvé ou non autorisé." });
         res.json(post);
     } catch (err) {
-        console.error('Erreur PUT /profile/:userId/posts/:postId:', err); // Ajoute ce log
+        console.error('Erreur dans modifyUserPost:', err);
         res.status(500).json({ message: "Erreur serveur." });
     }
     },

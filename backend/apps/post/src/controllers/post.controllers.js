@@ -1,10 +1,30 @@
-const PostModel=require('../models/post.models');
+const PostModel = require('../models/post.models');
 const mongoose = require("mongoose");
 
-//Module pour obtenir des données  utilisation de getPosts et de la fonction find
-module.exports.getPosts=async(req,res)=>{
-    const posts= await PostModel.find();
-    res.status(200).json(posts);
+// GET avec pagination et recherche
+module.exports.getPosts = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, search = "" } = req.query;
+        const query = search
+            ? { content: { $regex: search, $options: "i" } }
+            : {};
+
+        const posts = await PostModel.find(query)
+            .skip((page - 1) * limit)
+            .limit(Number(limit))
+            .sort({ createdAt: -1 });
+
+        const total = await PostModel.countDocuments(query);
+
+        res.status(200).json({
+            posts,
+            total,
+            page: Number(page),
+            pages: Math.ceil(total / limit)
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Erreur lors de la récupération des posts." });
+    }
 };
 
 
@@ -12,18 +32,14 @@ module.exports.getPosts=async(req,res)=>{
 
 //Mise en place d'un message avec la fonction setPosts
 module.exports.setPosts=async(req,res)=>{
-    //Boucle de vérification de contenu d'un message 
-    if(!req.body.message){
-        res.status(400).json({message:"Ajouter un message"})
-    }
-    //create permet de créer de nouveaux messages dans la BDD avec le shéma de PostModel
-    const post= await PostModel.create({
-        //stockage du message dans la BDD
-        message:req.body.message,
-        author:req.body.author,
-
-    }) 
-    res.status(200).json(post);
+    try {
+        const { author, content, title, imageUrl, tags, isPublic } = req.body;
+        const post = new PostModel({ author, content, title, imageUrl, tags, isPublic });
+        await post.save();
+        res.status(201).json(post);
+      } catch (err) {
+        res.status(500).json({ message: "Erreur lors de la création du post." });
+      }
 };
 
 //Module pour modifier les données
@@ -51,42 +67,5 @@ module.exports.deletePost = async (req, res) => {
     res.status(200).json({ message: "Post supprimé avec succès" });
 };
 
-//Module pour liker un post
-
-
-
-// module.exports.likePost = async (req, res) => {
-//     try {
-//         const objectId = new mongoose.Types.ObjectId(req.body.userId);
-//         const post = await PostModel.findByIdAndUpdate(
-//             req.params.id,
-//             { $addToSet: { likers: objectId } },
-//             { new: true }
-//         );
-//         res.status(200).send(post);
-//     } catch (err) {
-//         console.error("Erreur dans likePost :", err);
-//         res.status(400).json({ message: "Erreur serveur", error: err.message });
-//     }
-// };
-
-
-
-// //Module pour disliker un post
-
-// module.exports.dislikePost = async (req, res) => {
-//     try {
-//         const objectId = new mongoose.Types.ObjectId(req.body.userId);
-//         const post = await PostModel.findByIdAndUpdate(
-//             req.params.id,
-//             { $pull: { likers: objectId } },
-//             { new: true }
-//         );
-//         res.status(200).send(post);
-//     } catch (err) {
-//         console.error("Erreur dans dislikePost :", err);
-//         res.status(400).json({ message: "Erreur serveur", error: err.message });
-//     }
-// };
 
 

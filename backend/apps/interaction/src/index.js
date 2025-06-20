@@ -1,10 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const routes = require('./routes/interaction.routes');
+const interactionRoutes = require('./routes/interaction.routes');
 
 const app = express();
 app.use(express.json());
-app.use('/interaction', routes);
+app.use('/', require('./routes/interaction.routes'));
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')
   .then(() => app.listen(4007, () => console.log('interaction service running on port 4007')))

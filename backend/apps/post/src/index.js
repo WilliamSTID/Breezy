@@ -10,7 +10,7 @@ const PORT = process.env.PORT||4006;
 applyMiddlewares(app);
 
 //spécification des routes à aller récupérer
-app.use("/posts", require("./routes/post.routes"));
+app.use('/posts', require('./routes/post.routes'));
 
 //connexion avec la BDD mongoD via la bibliothèque Mongoose
 mongoose
@@ -22,4 +22,4 @@ mongoose
     })
     .catch((err) => {
       console.error('Erreur lors de la connexion à MongoDB :', err);
-    }); 
+    });

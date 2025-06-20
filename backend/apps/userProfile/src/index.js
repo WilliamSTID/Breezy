@@ -1,12 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const routes = require('./routes/userProfile.routes.js');
+const userProfileRoutes = require('./routes/userProfile.routes');
 
 
 const app = express();
 app.use(express.json());
 
-app.use('/',routes)
+app.use('/userprofile', userProfileRoutes);
 
 const PORT = process.env.PORT || 4003;
 
@@ -20,4 +20,4 @@ mongoose
     })
     .catch((err) => {
       console.error('Erreur lors de la connexion à MongoDB :', err);
-    }); 
+    });

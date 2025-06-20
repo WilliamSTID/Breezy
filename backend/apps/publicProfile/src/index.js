@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 4001;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/', publicProfileRoutes);
+app.use('/api/publicprofile', publicProfileRoutes);
 
 mongoose
     .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/breezy')

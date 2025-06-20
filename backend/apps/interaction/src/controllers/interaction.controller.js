@@ -8,6 +8,7 @@ exports.addComment = async (req, res) => {
     await comment.save();
     res.status(201).json(comment);
   } catch (err) {
+    console.error("Erreur addComment:", err);
     res.status(500).json({ message: "Erreur lors de l'ajout du commentaire." });
   }
 };

@@ -54,6 +54,7 @@ services:
     container_name: authentification
     environment:
       - MONGO_URI=mongodb://mongo:27017/breezy
+      - JWT_SECRET=super_secret_breezy
     depends_on:
       - mongo
     ports:
