@@ -33,6 +33,7 @@ services:
     container_name: userprofile
     environment:
       - MONGO_URI=mongodb://mongo:27017/breezy
+      - JWT_SECRET=super_secret_breezy
     depends_on:
       - mongo
     ports:
@@ -108,14 +109,16 @@ services:
   gateway:
     build: ./apps/gateway
     container_name: gateway
+    environment:
+      - JWT_SECRET=super_secret_breezy
     ports:
       - "4000:4000"
     depends_on:
+      - authentification
       - followers
       - publicprofile
       - userprofile
       - useraccount
-      - authentification
       - post
       - interaction
       - feed

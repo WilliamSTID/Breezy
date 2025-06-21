@@ -1,17 +1,20 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middlewares/auth.controller'); 
 
 const userProfileController = require('../controllers/userProfile.controller.js');
-const UserProfile = require('../models/UserProfile'); // adapte le nom si besoin
+const UserProfile = require('../models/UserProfile'); 
+
+// Protège toutes les routes suivantes
+router.use(auth);
 
 router.get('/profile/:userId/posts', userProfileController.getUserPosts);
 router.put('/profile/:userId/posts/:postId', userProfileController.modifyUserPost);
 router.post('/profile/:userId/posts', async (req, res) => {
   try {
-    // ... logique pour créer un post pour le userId ...
     res.json({ message: 'Post créé' });
   } catch (err) {
-    console.error(err); // Ajoute ceci pour voir l’erreur dans les logs
+    console.error(err); 
     res.status(500).json({ message: "Erreur serveur." });
   }
 });

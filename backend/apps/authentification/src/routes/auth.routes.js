@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const auth = require('../middlewares/auth.controller');
 const router = express.Router();
 
 // Middleware pour gérer les erreurs de requêtes
@@ -153,6 +154,12 @@ router.post("/verify-token", requestErrorHandler(async (req, res) => {
   
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   res.json({ valid: true, user: decoded });
+}));
+
+// Nouvelle route pour récupérer tous les utilisateurs (protégée)
+router.get('/', auth, requestErrorHandler(async (req, res) => {
+  const users = await User.find({}, 'id username email name bio');
+  res.json(users);
 }));
 
 module.exports = router;

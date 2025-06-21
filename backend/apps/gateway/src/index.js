@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const app = express();
 
 const PORT = process.env.PORT || 4000;
@@ -28,6 +29,20 @@ app.use('/api/publicprofile', createProxyMiddleware({
   changeOrigin: true
 }));
 
+// Place AVANT :
+app.use('/api/users/profile', createProxyMiddleware({
+  target: 'http://userprofile:4003/userprofile',
+  changeOrigin: true,
+  pathRewrite: { '^/api/users/profile': '' }
+}));
+
+// Puis ensuite :
+app.use('/api/users', createProxyMiddleware({
+  target: 'http://authentification:4005',
+  changeOrigin: true,
+  pathRewrite: { '^/api/users': '/api/users' }
+}));
+
 // Si tu as des routes locales à la gateway, tu peux parser le body APRÈS
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
@@ -40,12 +55,8 @@ const serviceRoutes = [
   },
   {
     path: '/api/users/profile',
-    target: 'http://userprofile:4003',
-    pathRewrite: (path) => path.replace('/api/users/profile', '/userprofile'),
-  },
-  {
-    path: '/api/users',
-    target: 'http://useraccount:4004',
+    target: 'http://userprofile:4003/userprofile',
+    pathRewrite: { '^/api/users/profile': '' },
   },
   {
     path: '/api/posts',
@@ -61,6 +72,28 @@ const serviceRoutes = [
     pathRewrite: (path) => path.replace('/api/feed', '/feed'),
   }
 ];
+
+// Middleware d'authentification global
+app.use((req, res, next) => {
+  // Ignore la route de test ou les routes publiques si besoin
+  if (req.path === '/' || req.path.startsWith('/api/publicprofile')) {
+    return next();
+  }
+
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).json({ message: 'Token manquant' });
+  }
+
+  // Vérifie le token (remplace 'votre_secret' par ta vraie clé secrète)
+  jwt.verify(token, process.env.JWT_SECRET || 'votre_secret', (err, user) => {
+    if (err) return res.status(403).json({ message: 'Token invalide' });
+    req.user = user;
+    next();
+  });
+});
 
 // Setup proxies
 serviceRoutes.forEach(route => {
@@ -85,3 +118,5 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
 });
+
+console.log('JWT_SECRET:', process.env.JWT_SECRET);

@@ -78,11 +78,15 @@ app.use((req, res, next) => {
 
 // Routes - APRÈS le middleware keep-alive
 const authRoutes = require("./routes/auth.routes.js");
-const userRoutes = require("./routes/user.routes.js");
 
 // Application des routes
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/users", authRoutes);
+
+const auth = require('./middlewares/auth.controller');
+
+// Place ce middleware APRÈS les routes publiques, AVANT les routes protégées
+app.use(auth);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
@@ -97,4 +101,5 @@ app.get("/", (req, res) => {
 // Lancement du serveur
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
+  console.log('AUTH JWT_SECRET:', process.env.JWT_SECRET);
 });

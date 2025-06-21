@@ -1,12 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const userProfileRoutes = require('./routes/userProfile.routes');
+const userprofileRoutes = require('./routes/userProfile.routes');
 
 
 const app = express();
 app.use(express.json());
 
-app.use('/userprofile', userProfileRoutes);
+app.use('/userprofile', userprofileRoutes);
 
 const PORT = process.env.PORT || 4003;
 
