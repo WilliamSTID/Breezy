@@ -1,7 +1,7 @@
 FROM node:20
 
 WORKDIR /app
-COPY . ./
+COPY . .
 
 RUN npm install
 
