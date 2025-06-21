@@ -61,6 +61,7 @@ const serviceRoutes = [
   {
     path: '/api/posts',
     target: 'http://post:4006',
+    pathRewrite: { '^/api/posts': '/api/posts' }
   },
   {
     path: '/api/interactions',
