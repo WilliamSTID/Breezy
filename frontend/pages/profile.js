@@ -20,7 +20,7 @@ export default function ProfilePage() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:4003/profile", {
+        const res = await fetch("http://localhost:4000/api/users", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -39,7 +39,7 @@ export default function ProfilePage() {
 
     const fetchUserPosts = async (userId, token) => {
       try {
-        const res = await fetch(`http://localhost:4003/profile/${userId}/posts`, {
+        const res = await fetch(`http://localhost:4000/api/profile/${userId}/posts`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
