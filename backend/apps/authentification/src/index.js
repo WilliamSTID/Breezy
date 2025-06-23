@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 // Middleware de débogage
 app.use((req, res, next) => {
   const requestId = Date.now();
-  console.log(`[${requestId}] Début de la requête: ${req.method} ${req.path}`);
+    console.log(`[${requestId}] Début de la requête: ${req.method} ${req.path}`);
   
   const originalSend = res.send;
   res.send = function(data) {

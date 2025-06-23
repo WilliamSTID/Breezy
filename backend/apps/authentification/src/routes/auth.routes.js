@@ -28,10 +28,14 @@ const requestErrorHandler = (handler) => {
 
 // Route d'inscription
 router.post("/register", async (req, res) => {
-  console.log("Début de la requête d'inscription");
+  console.log(req.body);
+  console.log("Début de la requête d'inscription tto");
+
   const startTime = Date.now();
   
   try {
+
+
     const { username, email, password, name, bio } = req.body;
     
     // Validation rapide pour éviter les requêtes inutiles vers la base de données
