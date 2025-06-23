@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Heart, MessageCircle } from "lucide-react";
 import Layout from "@/components/Layout";
+import { jwtDecode } from "jwt-decode";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -12,33 +13,51 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState("");
   const [posting, setPosting] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    fetchPosts();
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token trouvé dans localStorage ?", token);
+
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+      const decoded = jwtDecode(token);
+      console.log("Token décodé :", decoded);
+      setUserId(decoded.id); // ou decoded.userId selon ton backend
+    } catch (err) {
+      console.error("Token invalide", err);
+      router.push("/login");
+    }
   }, []);
 
-  const fetchPosts = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
 
-    try {
-      const res = await fetch("http://localhost:4000/api/posts/feed", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      const data = await res.json();
-      setPosts(data.posts || []);
-    } catch (err) {
-      console.error("Erreur lors du chargement des posts", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchPosts = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`http://localhost:4000/api/feed/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setPosts(data);
+      } catch (err) {
+        console.error("Erreur lors du chargement des posts", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [userId]);
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();

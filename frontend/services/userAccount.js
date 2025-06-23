@@ -32,19 +32,19 @@ export async function login(email, password) {
     return await response.json(); // ✅ retour du JSON
   }
 
-  export async function getProfile() {
-    const token = localStorage.getItem("token");
-  
-    const response = await fetch("http://localhost:4005/profile", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`, // 🔐 Envoie le token
-      },
-    });
-  
-    if (!response.ok) {
-      throw new Error("Échec de récupération du profil");
-    }
-  
-    return await response.json();
-  }
+export async function getProfile() {
+const token = localStorage.getItem("token");
+
+const response = await fetch("http://localhost:4005/profile", {
+  method: "GET",
+  headers: {
+    Authorization: `Bearer ${token}`, // 🔐 Envoie le token
+  },
+});
+
+if (!response.ok) {
+  throw new Error("Échec de récupération du profil");
+}
+
+return await response.json();
+}
