@@ -1,5 +1,6 @@
 .env
 node_modules/
+
 ...existing code...
 package-lock.json
 node_modules/.package-lock.json
