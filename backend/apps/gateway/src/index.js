@@ -1,10 +1,21 @@
 require('dotenv').config();
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const cors = require('cors');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const app = express();
 
 const PORT = process.env.PORT || 4000;
+
+app.use(cors({
+  origin: "http://localhost:3000",              // ⬅ front autorisé (mets ton domaine en prod)
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
+  credentials: true                             // si tu passes cookies/session
+}));
+
+// Répond correctement aux pré-vols OPTIONS
+app.options("*", cors());
 
 // Proxy AVANT tout body-parser !
 app.use('/api/auth', express.json()); // Ajoute ce middleware AVANT le proxy
