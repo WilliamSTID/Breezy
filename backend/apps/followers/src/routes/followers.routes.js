@@ -9,9 +9,10 @@ router.get('/', async (req, res) => {
 });
 
 // Récupère les followers d'un userId
-router.get('/:userId', async (req, res) => {
+router.get('/follower/:userId', async (req, res) => {
   try {
-    const followers = await Follower.find({ followed: req.params.userId });
+    console.log(req.params.userId);
+    const followers = await Follower.find({ user: req.params.userId });
     res.json(followers);
   } catch (err) {
     res.status(500).json({ error: 'Erreur serveur' });

@@ -33,30 +33,27 @@ export default function DashboardPage() {
     }
   }, []);
 
-
+  const fetchPosts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:4000/api/feed/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setPosts(data);
+    } catch (err) {
+      console.error("Erreur lors du chargement des posts", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!userId) return;
-
-    const fetchPosts = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:4000/api/feed/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-        setPosts(data);
-      } catch (err) {
-        console.error("Erreur lors du chargement des posts", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
+    if (userId) {
+      fetchPosts();
+    }
   }, [userId]);
 
   const handlePostSubmit = async (e) => {
@@ -78,12 +75,12 @@ export default function DashboardPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ content: newPost }),
+        body: JSON.stringify({ content: newPost, author: userId }),
       });
 
       if (res.ok) {
         setNewPost("");
-        fetchPosts(); // recharge les posts
+        fetchPosts();
       } else {
         const errorText = await res.text();
         console.error("Erreur lors de la publication :", errorText);

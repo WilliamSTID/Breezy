@@ -10,8 +10,6 @@ const PostSchema = new mongoose.Schema({
   isPublic: { type: Boolean, default: true },
   likesCount: { type: Number, default: 0 },
   commentsCount: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+  },{ timestamps: true });
 
 module.exports = mongoose.model('Post', PostSchema);

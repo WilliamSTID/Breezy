@@ -33,12 +33,14 @@ module.exports.getPosts = async (req, res) => {
 //Mise en place d'un message avec la fonction setPosts
 module.exports.setPosts=async(req,res)=>{
     try {
+        console.log(req.body);
         const { author, content, title, imageUrl, tags, isPublic } = req.body;
         const post = new PostModel({ author, content, title, imageUrl, tags, isPublic });
         await post.save();
         res.status(201).json(post);
       } catch (err) {
-        res.status(500).json({ message: "Erreur lors de la création du post." });
+        res.status(500).json({ message: "Erreur lors de la création du post.",
+        "erreur":err});
       }
 };
 
@@ -67,15 +69,31 @@ module.exports.deletePost = async (req, res) => {
     res.status(200).json({ message: "Post supprimé avec succès" });
 };
 
-// Récupérer les posts par utilisateur
+// // Récupérer les posts par utilisateur
+// module.exports.getPostsByUser = async (req, res) => {
+//     try {
+//         const posts = await PostModel.find({ author: req.params.userId });
+//         res.json(posts);
+//     } catch (err) {
+//         res.status(500).json({ message: "Erreur lors de la récupération des posts." });
+//     }
+// };
+
+// routes/posts.js ou similaire
 module.exports.getPostsByUser = async (req, res) => {
     try {
-        const posts = await PostModel.find({ author: req.params.userId });
+        const { userIds } = req.body;
+        if (!Array.isArray(userIds) || userIds.length === 0) {
+            return res.status(400).json({ message: "userIds doit être un tableau non vide." });
+        }
+
+        const posts = await PostModel.find({ author: { $in: userIds } });
         res.json(posts);
     } catch (err) {
         res.status(500).json({ message: "Erreur lors de la récupération des posts." });
     }
 };
+
 
 
 
