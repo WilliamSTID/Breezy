@@ -20,8 +20,19 @@ router.get('/:userId', async (req, res) => {
     console.log(postsRes.data)
     const posts = postsRes.data;
 
+    const likesRes = await axios.post('http://interaction:4007/likes/count', {
+      postIds: posts.map(p => p._id)
+    });
+
+    const likeMap = new Map(likesRes.data.map(like => [like.postId, like.likeCount]));
+
+    const postsWithLikes = posts.map(post => ({
+      ...post,
+      likes: likeMap.get(post._id) || 0
+    }));
+
     // 3. Trier les posts par date décroissante
-    posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    postsWithLikes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     res.json(posts);
   } catch (err) {

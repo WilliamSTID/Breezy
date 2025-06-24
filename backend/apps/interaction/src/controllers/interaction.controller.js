@@ -25,3 +25,37 @@ exports.likePost = async (req, res) => {
     res.status(500).json({ message: "Erreur lors du like." });
   }
 };
+
+// controllers/likeController.js
+exports.countLikes = async (req, res) => {
+  const { postIds } = req.body;
+
+  if (!Array.isArray(postIds) || postIds.length === 0) {
+    return res.status(400).json({ message: "postIds doit être un tableau non vide." });
+  }
+
+  try {
+    const counts = await Like.aggregate([
+      {
+        $match: {
+          postId: { $in: postIds.map(id => new mongoose.Types.ObjectId(id)) }
+        }
+      },
+      {
+        $group: {
+          _id: '$postId',
+          likeCount: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const response = counts.map(c => ({
+      postId: c._id.toString(),
+      likeCount: c.likeCount
+    }));
+
+    res.json(response);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors du comptage des likes." });
+  }
+};
