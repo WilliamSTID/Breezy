@@ -14,6 +14,8 @@ export default function DashboardPage() {
   const [newPost, setNewPost] = useState("");
   const [posting, setPosting] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [popupComment, setPopupComment] = useState("");
 
   useEffect(() => {
     try {
@@ -53,41 +55,45 @@ export default function DashboardPage() {
 
   const fetchComments = async (postId) => {
     const token = localStorage.getItem("token");
+    const currentPost = posts.find((p) => p._id === postId);
 
-    setPosts((prevPosts) =>
-        prevPosts.map((p) =>
-            p._id === postId
-                ? { ...p, showComments: !p.showComments }
-                : p
-        )
-    );
-
-    const post = posts.find((p) => p._id === postId);
-
-    // Si on les a déjà, ne les recharge pas
-    if (post?.comments && post.showComments) return;
+    if (currentPost?.comments && currentPost.showComments) {
+      setSelectedPost(currentPost);
+      return;
+    }
 
     try {
       const res = await fetch(`http://localhost:4000/api/interactions/comments/${postId}`, {
         headers: {
-          Authorization: `Bearer ${token}`, // 🔐 AJOUT ICI
+          Authorization: `Bearer ${token}`,
         },
       });
+
       const comments = await res.json();
 
       if (!Array.isArray(comments)) {
         console.error("Les commentaires reçus ne sont pas un tableau :", comments);
         return;
       }
+
+      const updatedPost = {
+        ...currentPost,
+        comments,
+        showComments: true,
+      };
+
+      // Met à jour les posts
       setPosts((prevPosts) =>
-          prevPosts.map((p) =>
-              p._id === postId
-                  ? { ...p, comments }
-                  : p
+          prevPosts.map((post) =>
+              post._id === postId ? updatedPost : post
           )
       );
+
+      // Affiche les commentaires dans la popup
+      setSelectedPost(updatedPost);
+      setPopupComment("");
     } catch (err) {
-      console.error('Erreur chargement commentaires :', err);
+      console.error("Erreur chargement commentaires :", err);
     }
   };
 
@@ -172,7 +178,10 @@ export default function DashboardPage() {
   };
 
   const handleCommentSubmit = async (postId, content) => {
-    if (!content?.trim()) return;
+    if (!content?.trim()) {
+      console.warn("Commentaire vide, pas de requête envoyée.");
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -197,24 +206,38 @@ export default function DashboardPage() {
       }
 
       const newComment = await res.json();
+      console.log("Commentaire publié :", newComment);
 
-      // Réinitialiser le champ commentaire et mettre à jour localement si tu affiches les commentaires
+      // Mise à jour locale
+      // Mise à jour locale de posts
       setPosts((prevPosts) =>
           prevPosts.map((post) =>
               post._id === postId
                   ? {
                     ...post,
-                    newComment: "",
                     comments: [...(post.comments || []), newComment],
                     commentCount: (post.commentCount || 0) + 1,
                   }
                   : post
           )
       );
+
+// Mise à jour locale de selectedPost
+      if (selectedPost && selectedPost._id === postId) {
+        setSelectedPost((prev) => ({
+          ...prev,
+          comments: [...(prev.comments || []), newComment],
+          commentCount: (prev.commentCount || 0) + 1,
+        }));
+      }
+
+      setPopupComment("");
+
     } catch (err) {
       console.error("Erreur réseau lors de l'ajout du commentaire :", err);
     }
   };
+
 
 
 
@@ -287,53 +310,61 @@ export default function DashboardPage() {
                             <span>{post.likes || 0}</span>
                           </button>
 
-                          <button className="flex items-center gap-1 hover:text-blue-500 transition">
+                          <button
+                              onClick={() => fetchComments(post._id)}
+                              className="flex items-center gap-1 hover:text-blue-500 transition"
+                          >
                             <MessageCircle size={18} />
                             <span>{post.commentCount || 0}</span>
                           </button>
 
-                          <button
-                              onClick={() => fetchComments(post._id)}
-                              className="text-sm text-blue-500 hover:underline"
-                          >
-                            {post.showComments ? "Masquer les commentaires" : "Afficher les commentaires"}
-                          </button>
+
+                          {/*<button*/}
+                          {/*    onClick={async () => {*/}
+                          {/*      const updatedPost = await fetchComments(post._id);*/}
+                          {/*      if (updatedPost) setSelectedPost(updatedPost);*/}
+                          {/*    }}*/}
+                          {/*    className="text-sm text-blue-500 hover:underline"*/}
+                          {/*>*/}
+                          {/*  Voir les commentaires*/}
+                          {/*</button>*/}
+
                         </div>
 
                         {/* Affichage des commentaires */}
-                        {post.showComments && post.comments?.map((comment) => (
-                            <div
-                                key={comment._id}
-                                className="mt-2 pl-4 border-l text-sm text-gray-600"
-                            >
-                              <p>
-                                <strong>{comment.author?.username || "Utilisateur"}</strong> :{" "}
-                                {comment.content}
-                              </p>
-                            </div>
-                        ))}
+                        {/*{post.showComments && post.comments?.map((comment) => (*/}
+                        {/*    <div*/}
+                        {/*        key={comment._id}*/}
+                        {/*        className="mt-2 pl-4 border-l text-sm text-gray-600"*/}
+                        {/*    >*/}
+                        {/*      <p>*/}
+                        {/*        <strong>{comment.author?.username || "Utilisateur"}</strong> :{" "}*/}
+                        {/*        {comment.content}*/}
+                        {/*      </p>*/}
+                        {/*    </div>*/}
+                        {/*))}*/}
 
                         {/* Zone pour écrire un commentaire */}
                         <div className="mt-2">
-      <textarea
-          rows={2}
-          placeholder="Ajouter un commentaire..."
-          value={post.newComment || ""}
-          onChange={(e) =>
-              setPosts((prev) =>
-                  prev.map((p) =>
-                      p._id === post._id ? { ...p, newComment: e.target.value } : p
-                  )
-              )
-          }
-          className="w-full p-2 border rounded text-sm"
-      />
-                          <button
-                              onClick={() => handleCommentSubmit(post._id, post.newComment)}
-                              className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-                          >
-                            Publier
-                          </button>
+      {/*<textarea*/}
+      {/*    rows={2}*/}
+      {/*    placeholder="Ajouter un commentaire..."*/}
+      {/*    value={post.newComment || ""}*/}
+      {/*    onChange={(e) =>*/}
+      {/*        setPosts((prev) =>*/}
+      {/*            prev.map((p) =>*/}
+      {/*                p._id === post._id ? { ...p, newComment: e.target.value } : p*/}
+      {/*            )*/}
+      {/*        )*/}
+      {/*    }*/}
+      {/*    className="w-full p-2 border rounded text-sm"*/}
+      {/*/>*/}
+      {/*                    <button*/}
+      {/*                        onClick={() => handleCommentSubmit(post._id, post.newComment)}*/}
+      {/*                        className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"*/}
+      {/*                    >*/}
+      {/*                      Publier*/}
+      {/*                    </button>*/}
                         </div>
                       </motion.div>
                   ))}
@@ -341,6 +372,47 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+        {selectedPost && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+                <h2 className="text-lg font-bold mb-4">Commentaires</h2>
+
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                  {selectedPost.comments?.map((comment) => (
+                      <div key={comment._id} className="border-b pb-2">
+                        <p className="text-sm text-gray-700">
+                          <strong>{comment.author?.username || "Utilisateur"}</strong> : {comment.content}
+                        </p>
+                      </div>
+                  ))}
+
+                </div>
+
+                <textarea
+                    rows={2}
+                    placeholder="Ajouter un commentaire..."
+                    value={popupComment}
+                    onChange={(e) => setPopupComment(e.target.value)}
+                    className="w-full mt-4 p-2 border rounded text-sm"
+                />
+
+                <button
+                    onClick={() => handleCommentSubmit(selectedPost._id, popupComment)}
+                className="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Publier
+                </button>
+
+                <button
+                    onClick={() => setSelectedPost(null)}
+                    className="absolute top-2 right-3 text-gray-600 hover:text-gray-900 text-lg"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+        )}
+
       </Layout>
   );
 }

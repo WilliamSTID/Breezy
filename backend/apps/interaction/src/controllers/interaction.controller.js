@@ -8,13 +8,15 @@ exports.addComment = async (req, res) => {
   const { postId, author, content, parentComment } = req.body;
   try {
     const comment = new Comment({ postId, author, content, parentComment });
-    await comment.save();
-    res.status(201).json(comment);
+    const saved = await comment.save();
+    await saved.populate("author", "username"); // 🔥 Ajout ici
+    res.status(201).json(saved);
   } catch (err) {
     console.error("Erreur addComment:", err);
     res.status(500).json({ message: "Erreur lors de l'ajout du commentaire." });
   }
 };
+
 
 // exports.likePost = async (req, res) => {
 //   const { postId, userId } = req.body;
