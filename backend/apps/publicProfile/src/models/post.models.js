@@ -1,17 +1,14 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-//Création d'un shema
-const PostSchema = new mongoose.Schema({
-  author: { type: String, required: true },
-  content: { type: String, required: true },
-  title: { type: String, default: '' },
-  imageUrl: { type: String, default: '' },
-  tags: [{ type: String }],
-  isPublic: { type: Boolean, default: true },
-  likesCount: { type: Number, default: 0 },
-  commentsCount: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+const PostSchema = new mongoose.Schema(
+    {
+      content: { type: String, required: true },
+      author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+      parentId: { type: mongoose.Schema.Types.ObjectId, ref: "Post", default: null },
+      likes: { type: Number, default: 0 },
+      likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    },
+    { timestamps: true }
+);
 
-module.exports = mongoose.model('Post', PostSchema);
+module.exports = mongoose.model("Post", PostSchema);

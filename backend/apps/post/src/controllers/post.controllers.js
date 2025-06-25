@@ -31,17 +31,30 @@ module.exports.getPosts = async (req, res) => {
 
 
 //Mise en place d'un message avec la fonction setPosts
-module.exports.setPosts=async(req,res)=>{
+module.exports.setPosts = async (req, res) => {
     try {
-        console.log(req.body);
-        const { author, content, title, imageUrl, tags, isPublic } = req.body;
-        const post = new PostModel({ author, content, title, imageUrl, tags, isPublic });
+        const { author, content, parentId, title, imageUrl, tags, isPublic } = req.body;
+
+        const post = new PostModel({
+            author,
+            content,
+            parentId: parentId || null, // null si c’est un post principal
+            title,
+            imageUrl,
+            tags,
+            isPublic,
+        });
+
         await post.save();
+
+        // Tu peux décider ici de faire un populate de l’auteur si nécessaire
         res.status(201).json(post);
-      } catch (err) {
-        res.status(500).json({ message: "Erreur lors de la création du post.",
-        "erreur":err});
-      }
+    } catch (err) {
+        res.status(500).json({
+            message: "Erreur lors de la création du post/commentaire.",
+            erreur: err,
+        });
+    }
 };
 
 //Module pour modifier les données
@@ -94,6 +107,21 @@ module.exports.getPostsByUser = async (req, res) => {
     }
 };
 
+module.exports.getCommentsByPostId = async (req, res) => {
+    try {
+        const { postId } = req.params;
 
+        if (!mongoose.Types.ObjectId.isValid(postId)) {
+            return res.status(400).json({ message: "ID de post invalide" });
+        }
 
+        const comments = await PostModel.find({ parentId: postId })
+            .populate("author", "username")
+            .sort({ createdAt: 1 });
+
+        res.status(200).json(comments);
+    } catch (err) {
+        res.status(500).json({ message: "Erreur lors de la récupération des commentaires.", err });
+    }
+};
 

@@ -1,4 +1,4 @@
-const Post = require('../models/Post'); // Ajoute cette ligne
+const Post = require('../models/post.models'); // Ajoute cette ligne
 const axios = require('axios');
 
 module.exports = {
