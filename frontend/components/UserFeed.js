@@ -21,6 +21,9 @@ export default function UserFeed({ token }) {
 
       if (!response.ok) {
         const data = await response.json();
+        console.log("Type de data :", typeof data);
+        console.log("Est un tableau ?", Array.isArray(data));
+        console.log("Contenu :", data);
         console.warn("Erreur serveur : ", data.message);
         return;
       }

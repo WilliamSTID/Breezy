@@ -32,18 +32,18 @@ router.get('/following/:userId', async (req, res) => {
 // Suivre un utilisateur
 router.post('/follow', async (req, res) => {
   try {
-    const { follower, followed } = req.body;
-    if (!follower || !followed) return res.status(400).json({ error: 'Champs manquants' });
+    const { follower, user } = req.body;
+    if (!follower || !user) return res.status(400).json({ error: 'Champs manquants' });
 
     // Vérifie si déjà suivi
-    const exists = await Follower.findOne({ follower, followed });
+    const exists = await Follower.findOne({ follower, user });
     if (exists) return res.status(409).json({ error: 'Déjà suivi' });
 
-    const follow = new Follower({ follower, followed });
+    const follow = new Follower({ follower, user });
     await follow.save();
     res.status(201).json(follow);
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ error: 'Erreur serveur' , err});
   }
 });
 
