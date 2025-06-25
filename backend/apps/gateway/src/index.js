@@ -48,11 +48,11 @@ app.use('/api/users/profile', createProxyMiddleware({
 }));
 
 // Puis ensuite :
-app.use('/api/users', createProxyMiddleware({
-  target: 'http://authentification:4005',
-  changeOrigin: true,
-  pathRewrite: { '^/api/users': '/api/users' }
-}));
+// app.use('/api/users', createProxyMiddleware({
+//   target: 'http://authentification:4005',
+//   changeOrigin: true,
+//   pathRewrite: { '^/api/users': '/api/users' }
+// }));
 
 // Si tu as des routes locales à la gateway, tu peux parser le body APRÈS
 // app.use(express.json());
@@ -68,6 +68,28 @@ const serviceRoutes = [
     path: '/api/users/profile',
     target: 'http://userprofile:4003/userprofile',
     pathRewrite: { '^/api/users/profile': '' },
+  },
+  {
+    path: '/api/users',
+    target: 'http://userprofile:4003/userprofile',
+    pathRewrite: { '^/api/users': '' },
+    onProxyReq: (proxyReq, req) => {
+      console.log("🔁 Gateway envoie vers /userprofile/me");
+      if (req.user?.id) {
+        proxyReq.setHeader('X-User-Id', req.user.id);
+      }
+    }
+  },
+
+  {
+    path: '/api/account',
+    target: 'http://useraccount:4009/useraccount',
+    pathRewrite: { '^/api/account': '' },
+    onProxyReq: (proxyReq, req) => {
+      if (req.user?.id) {
+        proxyReq.setHeader('X-User-Id', req.user.id);
+      }
+    }
   },
   {
     path: '/api/posts',
@@ -87,40 +109,46 @@ const serviceRoutes = [
 
 // Middleware d'authentification global
 app.use((req, res, next) => {
-  // Ignore la route de test ou les routes publiques si besoin
   if (req.path === '/' || req.path.startsWith('/api/publicprofile')) {
     return next();
   }
 
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <token>"
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ message: 'Token manquant' });
   }
 
-  // Vérifie le token (remplace 'votre_secret' par ta vraie clé secrète)
+  console.log("📩 Token reçu dans Gateway :", token);
+
   jwt.verify(token, process.env.JWT_SECRET || 'votre_secret', (err, user) => {
-    if (err) return res.status(403).json({ message: 'Token invalide' });
+    if (err) {
+      console.log("❌ Token invalide :", err.message);
+      return res.status(403).json({ message: 'Token invalide' });
+    }
+
+    console.log("✅ Utilisateur identifié :", user);
     req.user = user;
-    next();
+    next(); // ← c'est ce next() qui laisse passer la requête au proxy
   });
 });
+
 
 // Setup proxies
 serviceRoutes.forEach(route => {
   app.use(
-    route.path,
-    createProxyMiddleware({
-      target: route.target,
-      changeOrigin: true,
-      pathRewrite: route.pathRewrite || (path => path.replace(route.path, '')),
-      timeout: 120000,
-      proxyTimeout: 120000,
-    })
+      route.path,
+      createProxyMiddleware({
+        target: route.target,
+        changeOrigin: true,
+        pathRewrite: route.pathRewrite || (path => path.replace(route.path, '')),
+        timeout: 120000,
+        proxyTimeout: 120000,
+        onProxyReq: route.onProxyReq // ⬅️ ajoute ceci
+      })
   );
 });
-
 // Route de test
 app.get('/', (req, res) => {
   res.send('API Gateway is running! 🌐');

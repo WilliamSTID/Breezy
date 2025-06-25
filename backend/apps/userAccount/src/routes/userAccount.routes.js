@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/User.js');
 const router = express.Router();
 
 // Liste tous les utilisateurs
@@ -36,6 +36,22 @@ router.delete('/users/:id', async (req, res) => {
     res.json({ message: 'Utilisateur supprimé' });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+        .select("username name bio avatar createdAt");
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Erreur lors de la récupération du profil :", err);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 });
 

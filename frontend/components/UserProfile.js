@@ -1,32 +1,20 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function ProfilePage() {
+const Profile = () => {
     const [user, setUser] = useState(null);
-    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    useEffect(() => {
-        if (!mounted) return;
-
         const fetchProfile = async () => {
             try {
-                const token = localStorage.getItem("token");
-                console.log("🔑 Token utilisé :", token);
-
-                if (!token) return; // Pas connecté
-
                 const res = await fetch("http://localhost:4000/api/users/me", {
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    }
                 });
 
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.message || "Erreur de chargement");
 
+                if (!res.ok) throw new Error(data.message || "Erreur lors du chargement du profil");
                 setUser(data);
             } catch (err) {
                 console.error(err.message);
@@ -34,15 +22,18 @@ export default function ProfilePage() {
         };
 
         fetchProfile();
-    }, [mounted]);
+    }, []);
 
-    if (!mounted) return null;
-    if (!user) return <p>Chargement...</p>;
+    if (!user) return <p>Chargement du profil...</p>;
 
     return (
-        <div className="max-w-md mx-auto mt-6 p-4 border rounded shadow bg-white">
+        <div className="max-w-md mx-auto mt-6 p-4 border rounded shadow">
             <div className="flex items-center space-x-4">
-                <img src={user.avatar} alt={user.username} className="w-16 h-16 rounded-full" />
+                <img
+                    src={user.avatar}
+                    alt={user.username}
+                    className="w-16 h-16 rounded-full object-cover"
+                />
                 <div>
                     <h2 className="text-xl font-bold">{user.name}</h2>
                     <p className="text-gray-500">@{user.username}</p>
@@ -54,4 +45,6 @@ export default function ProfilePage() {
             </p>
         </div>
     );
-}
+};
+
+export default Profile;

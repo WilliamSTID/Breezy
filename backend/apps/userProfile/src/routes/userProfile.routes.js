@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middlewares/auth.controller'); 
+const userProfileMiddleware = require('../middlewares/userProfile.controller');
+const User = require("../models/User");
 
 const userProfileController = require('../controllers/userProfile.controller.js');
 const UserProfile = require('../models/UserProfile'); 
 
-// Protège toutes les routes suivantes
-router.use(auth);
+// // Protège toutes les routes suivantes
+// router.use(userProfileMiddleware);
 
 router.get('/profile/:userId/posts', userProfileController.getUserPosts);
 router.put('/profile/:userId/posts/:postId', userProfileController.modifyUserPost);
@@ -60,6 +61,24 @@ router.put('/userprofile/:userId', async (req, res) => {
 router.post('/', async (req, res) => {
   // ... logique de création de profil ...
   res.json({ message: 'Profil créé' });
+});
+
+
+router.get("/me", async (req, res) => {
+  console.log("👉 Route GET /me appelée");
+
+  try {
+    const userId = req.header("X-User-Id"); // transmis par la gateway
+    if (!userId) return res.status(401).json({ message: "ID utilisateur manquant" });
+
+    const user = await User.findById(userId).select("username name bio avatar createdAt");
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+
+    res.json(user);
+  } catch (err) {
+    console.error("Erreur userProfile /me:", err.message);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
 });
 
 module.exports = router;
