@@ -53,7 +53,9 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
 
 
     const { username, email, password, bio } = req.body;
-    const avatarPath = req.file ? `/uploads/avatars/${req.file.filename}` : undefined;
+    const avatarPath = req.file
+        ? `/uploads/avatars/${req.file.filename}`
+        : `/uploads/avatars/default_picture.jpg`;
 
     // Validation rapide pour éviter les requêtes inutiles vers la base de données
     if (!username || !email || !password) {
