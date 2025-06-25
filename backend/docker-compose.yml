@@ -60,6 +60,8 @@ services:
       - mongo
     ports:
       - "4005:4005"
+    volumes:
+      - ./apps/authentification/src/uploads:/app/uploads
   
   post:
     build: ./apps/post

@@ -29,7 +29,7 @@ const requestErrorHandler = (handler) => {
 };
 
 const storage = multer.diskStorage({
-  destination: "./uploads/avatars",
+  destination: path.join(__dirname, "../uploads/avatars"),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     const name = `${Date.now()}-${file.fieldname}${ext}`;

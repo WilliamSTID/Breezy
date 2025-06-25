@@ -42,7 +42,11 @@ export default function ProfilePage() {
     return (
         <div className="max-w-md mx-auto mt-6 p-4 border rounded shadow bg-white">
             <div className="flex items-center space-x-4">
-                <img src={user.avatar} alt={user.username} className="w-16 h-16 rounded-full" />
+                <img
+                    src={`http://localhost:4005${user.avatar}`}
+                    alt={user.username}
+                    className="w-16 h-16 rounded-full"
+                />
                 <div>
                     <h2 className="text-xl font-bold">{user.name}</h2>
                     <p className="text-gray-500">@{user.username}</p>

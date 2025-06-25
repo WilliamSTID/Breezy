@@ -1,11 +1,23 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const path = require("path");
+const fs = require("fs");
+
 require('dotenv').config();
 
 // App setup
 const app = express();
 const PORT = process.env.PORT || 4005;
+
+const avatarDir = path.join(__dirname, "uploads", "avatars");
+
+if (!fs.existsSync(avatarDir)) {
+  fs.mkdirSync(avatarDir, { recursive: true });
+  console.log("📁 Dossier /uploads/avatars créé automatiquement");
+}
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Middlewares
 app.use(cors({

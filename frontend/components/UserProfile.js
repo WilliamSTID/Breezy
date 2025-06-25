@@ -30,10 +30,12 @@ const Profile = () => {
         <div className="max-w-md mx-auto mt-6 p-4 border rounded shadow">
             <div className="flex items-center space-x-4">
                 <img
-                    src={user.avatar}
+                    src={`http://localhost:4005${user.avatar}`} // port 4005 = backend
                     alt={user.username}
                     className="w-16 h-16 rounded-full object-cover"
                 />
+
+
                 <div>
                     <h2 className="text-xl font-bold">{user.name}</h2>
                     <p className="text-gray-500">@{user.username}</p>
