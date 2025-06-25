@@ -1,4 +1,4 @@
-const PostModel = require('../models/post.models');
+const PostModel = require('../models/Post');
 const mongoose = require("mongoose");
 
 // GET avec pagination et recherche

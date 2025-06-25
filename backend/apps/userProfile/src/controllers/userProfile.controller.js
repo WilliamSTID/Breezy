@@ -6,13 +6,14 @@ module.exports = {
 // Récupérer les messages d'un utilisateur
     getUserPosts: async (req, res) => {
         const userId = req.params.userId;
+        console.log(userId)
         try {
             // Appel au microservice post (adapte le port si besoin)
             const response = await axios.get(`http://post:4006/api/posts/user/${userId}`);
             res.json(response.data);
         } catch (err) {
             console.error(err.message);
-            res.status(500).json({ message: "Erreur lors de la récupération des posts." });
+            res.status(500).json({ message: "Erreur lors de la récupération des posts.",err:err });
         }
     }, 
 
