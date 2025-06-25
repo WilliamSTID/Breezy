@@ -120,7 +120,7 @@ exports.getCommentsForPost = async (req, res) => {
   try {
     const comments = await Comment.find({
       postId: new mongoose.Types.ObjectId(postId),
-      parentComment: null
+      // parentComment: null
     })
         .sort({ createdAt: 1 })
         .populate('author', 'username');

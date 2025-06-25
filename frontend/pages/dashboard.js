@@ -101,7 +101,7 @@ export default function DashboardPage() {
 
       const updatedPost = {
         ...currentPost,
-        comments,
+        comments: tree,
         showComments: true,
       };
 
@@ -216,35 +216,69 @@ export default function DashboardPage() {
           postId,
           author: userId,
           content,
-          parentComment, // 🔥 support récursif
+          parentComment,
         }),
       });
 
       const newComment = await res.json();
 
-      // Ajoute récursivement dans selectedPost.comments
-      setSelectedPost((prev) => {
-        const updated = JSON.parse(JSON.stringify(prev));
+      // 🔁 Mise à jour dans posts
+      setPosts((prevPosts) =>
+          prevPosts.map((p) => {
+            if (p._id !== postId) return p;
 
-        function insertReply(list) {
-          for (let i = 0; i < list.length; i++) {
-            if (list[i]._id === parentComment) {
-              list[i].replies = [...(list[i].replies || []), newComment];
-              return true;
+            const updated = JSON.parse(JSON.stringify(p));
+            updated.commentCount = (updated.commentCount || 0) + 1;
+
+            function insertReply(list) {
+              for (let i = 0; i < list.length; i++) {
+                if (list[i]._id === parentComment) {
+                  list[i].replies = [...(list[i].replies || []), newComment];
+                  return true;
+                }
+                if (list[i].replies && insertReply(list[i].replies)) return true;
+              }
+              return false;
             }
-            if (list[i].replies && insertReply(list[i].replies)) return true;
+
+            if (parentComment) {
+              insertReply(updated.comments);
+            } else {
+              updated.comments.push({ ...newComment, replies: [] });
+            }
+
+            return { ...updated, showComments: true };
+          })
+      );
+
+      // 🔁 Mise à jour dans selectedPost (popup)
+      if (selectedPost && selectedPost._id === postId) {
+        setSelectedPost((prev) => {
+          const updated = JSON.parse(JSON.stringify(prev))
+          updated.commentCount = (updated.commentCount || 0) + 1;
+
+
+          function insertReply(list) {
+            for (let i = 0; i < list.length; i++) {
+              if (list[i]._id === parentComment) {
+                list[i].replies = [...(list[i].replies || []), newComment];
+                return true;
+              }
+              if (list[i].replies && insertReply(list[i].replies)) return true;
+            }
+            return false;
           }
-          return false;
-        }
 
-        if (parentComment) {
-          insertReply(updated.comments);
-        } else {
-          updated.comments.push({ ...newComment, replies: [] });
-        }
+          if (parentComment) {
+            insertReply(updated.comments);
+          } else {
+            updated.comments.push({ ...newComment, replies: [] });
+          }
 
-        return updated;
-      });
+          return updated;
+        });
+      }
+
     } catch (err) {
       console.error("Erreur lors de l'ajout du commentaire :", err);
     }
