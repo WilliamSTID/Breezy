@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import Layout from "@/components/Layout";
 
 export default function ProfilePage() {
     const [user, setUser] = useState(null);
+    const [followStats, setFollowStats] = useState({ followers: 0, following: 0 });
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -14,9 +16,7 @@ export default function ProfilePage() {
         const fetchProfile = async () => {
             try {
                 const token = localStorage.getItem("token");
-                console.log("🔑 Token utilisé :", token);
-
-                if (!token) return; // Pas connecté
+                if (!token) return;
 
                 const res = await fetch("http://localhost:4000/api/users/me", {
                     headers: {
@@ -36,10 +36,39 @@ export default function ProfilePage() {
         fetchProfile();
     }, [mounted]);
 
-    if (!mounted) return null;
-    if (!user) return <p>Chargement...</p>;
+    useEffect(() => {
+        if (!user?._id) return;
+
+        const fetchFollowStats = async () => {
+            try {
+                const [followersRes, followingRes] = await Promise.all([
+                    fetch(`http://localhost:4000/api/followers/follower/${user._id}`),
+                    fetch(`http://localhost:4000/api/followers/following/${user._id}`)
+                ]);
+
+                const followersData = await followersRes.json();
+                const followingData = await followingRes.json();
+
+                if (!followersRes.ok || !followingRes.ok) {
+                    throw new Error("Erreur lors de la récupération des statistiques de follow");
+                }
+
+                setFollowStats({
+                    followers: followersData.length,
+                    following: followingData.length,
+                });
+            } catch (err) {
+                console.error("Erreur stats followers/following :", err.message);
+            }
+        };
+
+        fetchFollowStats();
+    }, [user]);
+
+    if (!mounted || !user) return <p>Chargement...</p>;
 
     return (
+        <Layout>
         <div className="max-w-md mx-auto mt-6 p-4 border rounded shadow bg-white">
             <div className="flex items-center space-x-4">
                 <img
@@ -53,9 +82,14 @@ export default function ProfilePage() {
                 </div>
             </div>
             <p className="mt-4">{user.bio}</p>
+            <div className="mt-4 flex space-x-6 text-sm text-gray-700">
+                <p><strong>{followStats.following}</strong> abonnements</p>
+                <p><strong>{followStats.followers}</strong> abonnés</p>
+            </div>
             <p className="mt-2 text-sm text-gray-400">
                 Inscrit le {new Date(user.createdAt).toLocaleDateString()}
             </p>
         </div>
+        </Layout>
     );
 }
