@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const auth = require('../middlewares/auth.controller');
 const router = express.Router();
+const multer = require("multer");
+const path = require("path");
 
 // Middleware pour gérer les erreurs de requêtes
 const requestErrorHandler = (handler) => {
@@ -26,9 +28,23 @@ const requestErrorHandler = (handler) => {
   };
 };
 
+const storage = multer.diskStorage({
+  destination: "./uploads/avatars",
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const name = `${Date.now()}-${file.fieldname}${ext}`;
+    cb(null, name);
+  }
+});
+
+const upload = multer({ storage });
+
+
 // Route d'inscription
-router.post("/register", async (req, res) => {
-  console.log(req.body);
+router.post("/register", upload.single("avatar"), async (req, res) => {
+  console.log("=== DEBUG REGISTER ===");
+  console.log("req.body:", req.body);
+  console.log("req.file:", req.file);
   console.log("Début de la requête d'inscription tto");
 
   const startTime = Date.now();
@@ -36,8 +52,9 @@ router.post("/register", async (req, res) => {
   try {
 
 
-    const { username, email, password, name, bio } = req.body;
-    
+    const { username, email, password, bio } = req.body;
+    const avatarPath = req.file ? `/uploads/avatars/${req.file.filename}` : undefined;
+
     // Validation rapide pour éviter les requêtes inutiles vers la base de données
     if (!username || !email || !password) {
       return res.status(400).json({ message: "Tous les champs obligatoires doivent être remplis" });
@@ -70,8 +87,9 @@ router.post("/register", async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      name: name || username,
-      bio: bio || ""
+      name: username,
+      bio: bio || "",
+      avatar: avatarPath || ""
     });
     
     console.log("Sauvegarde de l'utilisateur dans MongoDB");
@@ -95,7 +113,8 @@ router.post("/register", async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar
       }
     });
   } catch (error) {
@@ -106,13 +125,13 @@ router.post("/register", async (req, res) => {
     if (error.name === 'MongoServerError' && error.code === 11000) {
       return res.status(400).json({ message: "Cet email ou nom d'utilisateur existe déjà" });
     }
-    
-    return res.status(500).json({ message: "Erreur serveur lors de l'inscription" });
+
+    return res.status(500).json({ message: "Erreur serveur lors de l'inscription",erreur:error,error_mess:error.message });
   }
 });
 
 // Route de connexion
-router.post("/login", requestErrorHandler(async (req, res) => {
+router.post("/login",express.json(), requestErrorHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // Vérifier si l'utilisateur existe

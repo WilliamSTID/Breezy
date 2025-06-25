@@ -18,21 +18,21 @@ app.use(cors({
 app.options("*", cors());
 
 // Proxy AVANT tout body-parser !
-app.use('/api/auth', express.json()); // Ajoute ce middleware AVANT le proxy
+// app.use('/api/auth', express.json()); // Ajoute ce middleware AVANT le proxy
 app.use('/api/auth', createProxyMiddleware({
   target: 'http://authentification:4005',
   changeOrigin: true,
   pathRewrite: { '^/api/auth': '/api/auth' },
   selfHandleResponse: false,
-  onProxyReq: (proxyReq, req, res) => {
-    // Si le body existe, le forwarder manuellement
-    if (req.body) {
-      const bodyData = JSON.stringify(req.body);
-      proxyReq.setHeader('Content-Type', 'application/json');
-      proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-      proxyReq.write(bodyData);
-    }
-  }
+  // onProxyReq: (proxyReq, req, res) => {
+  //   // Si le body existe, le forwarder manuellement
+  //   if (req.body) {
+  //     const bodyData = JSON.stringify(req.body);
+  //     proxyReq.setHeader('Content-Type', 'application/json');
+  //     proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+  //     proxyReq.write(bodyData);
+  //   }
+  // }
 }));
 
 app.use('/api/publicprofile', createProxyMiddleware({

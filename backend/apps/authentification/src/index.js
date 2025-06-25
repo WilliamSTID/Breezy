@@ -14,10 +14,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Augmenter les limites pour les requêtes
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
-
 // Timeout court pour le développement
 app.use((req, res, next) => {
   req.setTimeout(60000, () => {

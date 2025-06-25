@@ -9,14 +9,32 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [avatar, setAvatar] = useState(null); // au lieu de ""
+  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("username", username);
+    formData.append("password", password);
+    formData.append("bio", bio);
+    if (avatar) {
+      formData.append("avatar", avatar);
+    }
+
     try {
-      await register(email, password, username);
+      const res = await fetch("http://localhost:4000/api/auth/register", {
+        method: "POST",
+        body: formData
+      });
+
+      if (!res.ok) throw new Error("Échec de l'inscription");
+
       alert("Inscription réussie !");
       router.push("/login");
     } catch (err) {
@@ -81,6 +99,33 @@ export default function RegisterPage() {
               required
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Photo de profil
+            </label>
+            <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setAvatar(e.target.files[0])}
+                className="w-full"
+            />
+          </div>
+
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Biographie
+            </label>
+            <textarea
+                className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Parlez un peu de vous..."
+                rows={3}
+            />
+          </div>
+
 
           <button
             type="submit"
