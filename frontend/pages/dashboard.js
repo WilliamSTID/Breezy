@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Heart, MessageCircle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { jwtDecode } from "jwt-decode";
+import CommentThread from '@/components/CommentThread';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -53,6 +54,26 @@ export default function DashboardPage() {
     }
   };
 
+  function buildCommentTree(comments) {
+    const map = {};
+    const roots = [];
+
+    comments.forEach((c) => {
+      map[c._id] = { ...c, replies: [] };
+    });
+
+    comments.forEach((c) => {
+      if (c.parentComment) {
+        map[c.parentComment]?.replies.push(map[c._id]);
+      } else {
+        roots.push(map[c._id]);
+      }
+    });
+
+    return roots;
+  }
+
+
   const fetchComments = async (postId) => {
     const token = localStorage.getItem("token");
     const currentPost = posts.find((p) => p._id === postId);
@@ -70,6 +91,8 @@ export default function DashboardPage() {
       });
 
       const comments = await res.json();
+      const tree = buildCommentTree(comments);
+
 
       if (!Array.isArray(comments)) {
         console.error("Les commentaires reçus ne sont pas un tableau :", comments);
@@ -177,11 +200,8 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCommentSubmit = async (postId, content) => {
-    if (!content?.trim()) {
-      console.warn("Commentaire vide, pas de requête envoyée.");
-      return;
-    }
+  const handleCommentSubmit = async (postId, content, parentComment = null) => {
+    if (!content?.trim()) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -196,45 +216,37 @@ export default function DashboardPage() {
           postId,
           author: userId,
           content,
+          parentComment, // 🔥 support récursif
         }),
       });
 
-      if (!res.ok) {
-        const error = await res.text();
-        console.error("Erreur lors du commentaire :", error);
-        return;
-      }
-
       const newComment = await res.json();
-      console.log("Commentaire publié :", newComment);
 
-      // Mise à jour locale
-      // Mise à jour locale de posts
-      setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-              post._id === postId
-                  ? {
-                    ...post,
-                    comments: [...(post.comments || []), newComment],
-                    commentCount: (post.commentCount || 0) + 1,
-                  }
-                  : post
-          )
-      );
+      // Ajoute récursivement dans selectedPost.comments
+      setSelectedPost((prev) => {
+        const updated = JSON.parse(JSON.stringify(prev));
 
-// Mise à jour locale de selectedPost
-      if (selectedPost && selectedPost._id === postId) {
-        setSelectedPost((prev) => ({
-          ...prev,
-          comments: [...(prev.comments || []), newComment],
-          commentCount: (prev.commentCount || 0) + 1,
-        }));
-      }
+        function insertReply(list) {
+          for (let i = 0; i < list.length; i++) {
+            if (list[i]._id === parentComment) {
+              list[i].replies = [...(list[i].replies || []), newComment];
+              return true;
+            }
+            if (list[i].replies && insertReply(list[i].replies)) return true;
+          }
+          return false;
+        }
 
-      setPopupComment("");
+        if (parentComment) {
+          insertReply(updated.comments);
+        } else {
+          updated.comments.push({ ...newComment, replies: [] });
+        }
 
+        return updated;
+      });
     } catch (err) {
-      console.error("Erreur réseau lors de l'ajout du commentaire :", err);
+      console.error("Erreur lors de l'ajout du commentaire :", err);
     }
   };
 
@@ -379,12 +391,16 @@ export default function DashboardPage() {
 
                 <div className="max-h-60 overflow-y-auto space-y-2">
                   {selectedPost.comments?.map((comment) => (
-                      <div key={comment._id} className="border-b pb-2">
-                        <p className="text-sm text-gray-700">
-                          <strong>{comment.author?.username || "Utilisateur"}</strong> : {comment.content}
-                        </p>
-                      </div>
-                  ))}
+                      <CommentThread
+                          key={comment._id}
+                          comment={comment}
+                          depth={0}
+                          onReply={(parentId, content) =>
+                              handleCommentSubmit(selectedPost._id, content, parentId)
+                          }
+                      />
+                  ))
+                  }
 
                 </div>
 
