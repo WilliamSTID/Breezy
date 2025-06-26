@@ -11,6 +11,7 @@ export default function ProfilePage() {
     const [selectedPost, setSelectedPost] = useState(null);
     const [popupComment, setPopupComment] = useState("");
     const [followStats, setFollowStats] = useState({ followers: 0, following: 0 });
+    const [editingPostId, setEditingPostId] = useState(null);
 
 
     const userId = user?._id;
@@ -148,21 +149,28 @@ export default function ProfilePage() {
                 <h3 className="text-lg font-semibold mb-2">Mes publications</h3>
                 {posts.length > 0 ? (
                     posts.map((post) => (
-                        <Post key={post._id}>
-                            <Post.Header
-                                username={post.username}
-                                avatar={post.avatar}
-                                createdAt={post.createdAt}
-                            />                            <Post.Body content={post.content} />
-                            <Post.Footer
-                                post={post}
-                                currentUserId={userId}
-                                onLike={handleLike}
-                                onCommentClick={fetchComments}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                            />
-                        </Post>
+                        <Post
+                            key={post._id}
+                            post={post}
+                            currentUserId={userId}
+                            isEditing={editingPostId === post._id}
+                            editContent={editingPostId === post._id ? post.content : undefined}
+                            setEditContent={(content) => {
+                                setPosts((prev) =>
+                                    prev.map((p) => (p._id === post._id ? { ...p, content } : p))
+                                );
+                            }}
+                            onSave={() => {
+                                handleEdit(post._id, post.content);
+                                setEditingPostId(null);
+                            }}
+                            onCancel={() => setEditingPostId(null)}
+                            onLike={handleLike}
+                            onCommentClick={fetchComments}
+                            onEdit={() => setEditingPostId(post._id)}
+                            onDelete={handleDelete}
+                        />
+
                     ))
                 ) : (
                     <p className="text-gray-500">Aucune publication trouvée.</p>

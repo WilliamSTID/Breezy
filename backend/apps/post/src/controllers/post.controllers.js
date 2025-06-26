@@ -50,22 +50,21 @@ module.exports.editPost = async (req, res) => {
         const post = await PostModel.findById(req.params.id);
         if (!post) return res.status(404).json({ message: "Post inexistant" });
 
-        // Vérifier que l'utilisateur connecté est bien l'auteur
-        if (post.author.toString() !== req.user.id)
-        {
+        // Vérification sécurisée
+        if (!post.author || post.author.toString() !== req.user.id) {
             return res.status(403).json({ message: "Non autorisé à modifier ce post" });
         }
 
-        const updatePost = await PostModel.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        );
-        res.status(200).json(updatePost);
+        // Mise à jour manuelle et sauvegarde
+        post.content = req.body.content || post.content;
+        await post.save();
+
+        res.status(200).json(post);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: "Erreur lors de la modification", error: err.message });
     }
 };
+
 
 // Supprimer un post
 module.exports.deletePost = async (req, res) => {

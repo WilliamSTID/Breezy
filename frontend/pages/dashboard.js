@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [userId, setUserId] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const [popupComment, setPopupComment] = useState("");
+  const [editingPostId, setEditingPostId] = useState(null);
 
   useEffect(() => {
     try {
@@ -140,22 +141,28 @@ export default function DashboardPage() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.05 }}
                       >
-                        <Post>
-                          <Post.Header
-                              username={post.username}
-                              avatar={post.avatar}
-                              createdAt={post.createdAt}
-                          />
-                          <Post.Body content={post.content} />
-                          <Post.Footer
-                              post={post}
-                              currentUserId={userId}
-                              onLike={handleLike}
-                              onCommentClick={fetchComments}
-                              onEdit={handleEdit}       // tu pourras gérer ça ensuite
-                              onDelete={handleDelete}   // idem
-                          />
-                        </Post>
+                        <Post
+                            post={post}
+                            currentUserId={userId}
+                            isEditing={editingPostId === post._id}
+                            editContent={editingPostId === post._id ? post.content : undefined}
+                            setEditContent={(content) => {
+                              setPosts((prev) =>
+                                  prev.map((p) => (p._id === post._id ? { ...p, content } : p))
+                              );
+                            }}
+                            onSave={() => {
+                              handleEdit(post._id, post.content);
+                              setEditingPostId(null);
+                            }}
+                            onCancel={() => setEditingPostId(null)}
+                            onLike={handleLike}
+                            onCommentClick={fetchComments}
+                            onEdit={() => setEditingPostId(post._id)}
+                            onDelete={handleDelete}
+                        />
+
+
                       </motion.div>
                   ))}
                 </div>

@@ -37,7 +37,7 @@ export default function PostFooter({
             {isAuthor && (
                 <div className="flex gap-4 mt-2 text-xs text-gray-500">
                     <button
-                        onClick={() => onEdit(post)}
+                        onClick={() => onEdit(post._id, post.content)}
                         className="hover:text-blue-600 flex items-center gap-1"
                     >
                         <Edit size={14} /> Modifier

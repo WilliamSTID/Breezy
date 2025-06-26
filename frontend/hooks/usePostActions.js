@@ -104,6 +104,8 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
             return;
         }
 
+        console.log("EDIT APPUYE")
+
         try {
             const res = await fetch(`http://localhost:4000/api/posts/${postId}`, {
                 method: "PUT",
@@ -120,11 +122,15 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
                 return;
             }
 
-            const { post } = await res.json();
+            const updatedPost = await res.json();
 
             // Mettre à jour le state local
             setPosts((prevPosts) =>
-                prevPosts.map((p) => (p._id === postId ? post : p))
+                prevPosts.map((p) =>
+                    p._id === postId
+                        ? { ...p, content: updatedPost.content }
+                        : p
+                )
             );
         } catch (err) {
             console.error("Erreur réseau lors de la modification :", err);
