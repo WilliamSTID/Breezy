@@ -5,7 +5,6 @@ const CommentSchema = new mongoose.Schema({
   author: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   content: { type: String, required: true },
   parentComment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }, // pour les réponses à un commentaire
-  createdAt: { type: Date, default: Date.now }
-});
+},{ timestamps: true });
 
 module.exports = mongoose.model('Comment', CommentSchema);

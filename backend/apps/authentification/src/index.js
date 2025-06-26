@@ -1,11 +1,23 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const path = require("path");
+const fs = require("fs");
+
 require('dotenv').config();
 
 // App setup
 const app = express();
 const PORT = process.env.PORT || 4005;
+
+const avatarDir = path.join(__dirname, "uploads", "avatars");
+
+if (!fs.existsSync(avatarDir)) {
+  fs.mkdirSync(avatarDir, { recursive: true });
+  console.log("📁 Dossier /uploads/avatars créé automatiquement");
+}
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Middlewares
 app.use(cors({
@@ -13,10 +25,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-// Augmenter les limites pour les requêtes
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Timeout court pour le développement
 app.use((req, res, next) => {
@@ -45,7 +53,7 @@ app.use((req, res, next) => {
 // Middleware de débogage
 app.use((req, res, next) => {
   const requestId = Date.now();
-  console.log(`[${requestId}] Début de la requête: ${req.method} ${req.path}`);
+    console.log(`[${requestId}] Début de la requête: ${req.method} ${req.path}`);
   
   const originalSend = res.send;
   res.send = function(data) {

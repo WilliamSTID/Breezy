@@ -1,0 +1,60 @@
+name: CI/CD Breezy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:6
+        ports: [27017:27017]
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+          cd apps/authentification && npm install
+          cd ../feed && npm install
+          cd ../followers && npm install
+          cd ../gateway && npm install
+          cd ../interaction && npm install
+          cd ../post && npm install
+          cd ../publicProfile && npm install
+          cd ../userAccount && npm install
+          cd ../userProfile && npm install
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          # Adapter selon la structure de tes tests
+          # npm test
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm test
