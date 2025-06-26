@@ -7,6 +7,8 @@ import { Heart, MessageCircle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { jwtDecode } from "jwt-decode";
 import CommentThread from '@/components/CommentThread';
+import Post from "@/components/Post";
+import { usePostActions } from "@/hooks/usePostActions";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -54,238 +56,39 @@ export default function DashboardPage() {
     }
   };
 
-  function buildCommentTree(comments) {
-    const map = {};
-    const roots = [];
-
-    comments.forEach((c) => {
-      map[c._id] = { ...c, replies: [] };
-    });
-
-    comments.forEach((c) => {
-      if (c.parentComment) {
-        map[c.parentComment]?.replies.push(map[c._id]);
-      } else {
-        roots.push(map[c._id]);
-      }
-    });
-
-    return roots;
-  }
-
-
-  const fetchComments = async (postId) => {
-    const token = localStorage.getItem("token");
-    const currentPost = posts.find((p) => p._id === postId);
-
-    if (currentPost?.comments && currentPost.showComments) {
-      setSelectedPost(currentPost);
-      return;
-    }
-
-    try {
-      const res = await fetch(`http://localhost:4000/api/interactions/comments/${postId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const comments = await res.json();
-      const tree = buildCommentTree(comments);
-
-
-      if (!Array.isArray(comments)) {
-        console.error("Les commentaires reçus ne sont pas un tableau :", comments);
-        return;
-      }
-
-      const updatedPost = {
-        ...currentPost,
-        comments: tree,
-        showComments: true,
-      };
-
-      // Met à jour les posts
-      setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-              post._id === postId ? updatedPost : post
-          )
-      );
-
-      // Affiche les commentaires dans la popup
-      setSelectedPost(updatedPost);
-      setPopupComment("");
-    } catch (err) {
-      console.error("Erreur chargement commentaires :", err);
-    }
-  };
-
-
   useEffect(() => {
     if (userId) {
       fetchPosts();
     }
   }, [userId]);
 
-  const handlePostSubmit = async (e) => {
-    e.preventDefault();
-    if (!newPost.trim()) return;
+  useEffect(() => {
+    if (!selectedPost) return;
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
+    const refreshed = posts.find(p => p._id === selectedPost._id);
+    if (refreshed) {
+      setSelectedPost(JSON.parse(JSON.stringify(refreshed)));
     }
+  }, [posts]);
 
-    setPosting(true);
-
-    try {
-      const res = await fetch("http://localhost:4000/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content: newPost, author: userId }),
-      });
-
-      if (res.ok) {
-        setNewPost("");
-        fetchPosts();
-      } else {
-        const errorText = await res.text();
-        console.error("Erreur lors de la publication :", errorText);
-      }
-    } catch (error) {
-      console.error("Erreur réseau :", error);
-    } finally {
-      setPosting(false);
-    }
-  };
-
-  const handleLike = async (postId) => {
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch("http://localhost:4000/api/interactions/like", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ postId, userId }),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        console.warn("Erreur lors du like :", error.message);
-        return;
-      }
-
-      // Mise à jour locale (optimistic toggle)
-      setPosts((prevPosts) =>
-          prevPosts.map((post) => {
-            if (post._id !== postId) return post;
-
-            const isLiking = !post.liked;
-            return {
-              ...post,
-              liked: isLiking,
-              likes: isLiking ? (post.likes || 0) + 1 : (post.likes || 0) - 1,
-            };
-          })
-      );
-    } catch (err) {
-      console.error("Erreur réseau lors du like :", err);
-    }
-  };
-
-  const handleCommentSubmit = async (postId, content, parentComment = null) => {
-    if (!content?.trim()) return;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch("http://localhost:4000/api/interactions/comment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          postId,
-          author: userId,
-          content,
-          parentComment,
-        }),
-      });
-
-      const newComment = await res.json();
-
-      // 🔁 Mise à jour dans posts
-      setPosts((prevPosts) =>
-          prevPosts.map((p) => {
-            if (p._id !== postId) return p;
-
-            const updated = JSON.parse(JSON.stringify(p));
-            updated.commentCount = (updated.commentCount || 0) + 1;
-
-            function insertReply(list) {
-              for (let i = 0; i < list.length; i++) {
-                if (list[i]._id === parentComment) {
-                  list[i].replies = [...(list[i].replies || []), newComment];
-                  return true;
-                }
-                if (list[i].replies && insertReply(list[i].replies)) return true;
-              }
-              return false;
-            }
-
-            if (parentComment) {
-              insertReply(updated.comments);
-            } else {
-              updated.comments.push({ ...newComment, replies: [] });
-            }
-
-            return { ...updated, showComments: true };
-          })
-      );
-
-      // 🔁 Mise à jour dans selectedPost (popup)
-      if (selectedPost && selectedPost._id === postId) {
-        setSelectedPost((prev) => {
-          const updated = JSON.parse(JSON.stringify(prev))
-          updated.commentCount = (updated.commentCount || 0) + 1;
-
-
-          function insertReply(list) {
-            for (let i = 0; i < list.length; i++) {
-              if (list[i]._id === parentComment) {
-                list[i].replies = [...(list[i].replies || []), newComment];
-                return true;
-              }
-              if (list[i].replies && insertReply(list[i].replies)) return true;
-            }
-            return false;
-          }
-
-          if (parentComment) {
-            insertReply(updated.comments);
-          } else {
-            updated.comments.push({ ...newComment, replies: [] });
-          }
-
-          return updated;
-        });
-      }
-
-    } catch (err) {
-      console.error("Erreur lors de l'ajout du commentaire :", err);
-    }
-  };
-
-
-
+  const {
+    handleLike,
+    fetchComments,
+    handleEdit,
+    handleDelete,
+    handlePostSubmit,
+    handleCommentSubmit
+  } = usePostActions({
+    userId,
+    posts,
+    setPosts,
+    setSelectedPost,
+    setPopupComment,
+    fetchPosts,
+    setNewPost,
+    setPosting,
+    router,
+  });
 
   return (
       <Layout>
@@ -301,7 +104,10 @@ export default function DashboardPage() {
             </motion.h1>
 
             <motion.form
-                onSubmit={handlePostSubmit}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handlePostSubmit(newPost);
+                }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
@@ -333,85 +139,23 @@ export default function DashboardPage() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.05 }}
-                          className="bg-white p-4 rounded-xl shadow hover:shadow-md transition"
                       >
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium text-gray-800">{post.username}</span>
-                          <span className="text-xs text-gray-500">
-        {new Date(post.createdAt).toLocaleString()}
-      </span>
-                        </div>
-                        <p className="text-sm text-gray-700 whitespace-pre-line">{post.content}</p>
-
-                        <div className="flex gap-6 mt-3 text-gray-500 text-sm">
-                          <button
-                              onClick={() => handleLike(post._id)}
-                              className="flex items-center gap-1 hover:text-red-500 transition"
-                          >
-                            <Heart
-                                size={18}
-                                fill={post.liked ? "red" : "none"}
-                                stroke={post.liked ? "red" : "currentColor"}
-                            />
-                            <span>{post.likes || 0}</span>
-                          </button>
-
-                          <button
-                              onClick={() => fetchComments(post._id)}
-                              className="flex items-center gap-1 hover:text-blue-500 transition"
-                          >
-                            <MessageCircle size={18} />
-                            <span>{post.commentCount || 0}</span>
-                          </button>
-
-
-                          {/*<button*/}
-                          {/*    onClick={async () => {*/}
-                          {/*      const updatedPost = await fetchComments(post._id);*/}
-                          {/*      if (updatedPost) setSelectedPost(updatedPost);*/}
-                          {/*    }}*/}
-                          {/*    className="text-sm text-blue-500 hover:underline"*/}
-                          {/*>*/}
-                          {/*  Voir les commentaires*/}
-                          {/*</button>*/}
-
-                        </div>
-
-                        {/* Affichage des commentaires */}
-                        {/*{post.showComments && post.comments?.map((comment) => (*/}
-                        {/*    <div*/}
-                        {/*        key={comment._id}*/}
-                        {/*        className="mt-2 pl-4 border-l text-sm text-gray-600"*/}
-                        {/*    >*/}
-                        {/*      <p>*/}
-                        {/*        <strong>{comment.author?.username || "Utilisateur"}</strong> :{" "}*/}
-                        {/*        {comment.content}*/}
-                        {/*      </p>*/}
-                        {/*    </div>*/}
-                        {/*))}*/}
-
-                        {/* Zone pour écrire un commentaire */}
-                        <div className="mt-2">
-      {/*<textarea*/}
-      {/*    rows={2}*/}
-      {/*    placeholder="Ajouter un commentaire..."*/}
-      {/*    value={post.newComment || ""}*/}
-      {/*    onChange={(e) =>*/}
-      {/*        setPosts((prev) =>*/}
-      {/*            prev.map((p) =>*/}
-      {/*                p._id === post._id ? { ...p, newComment: e.target.value } : p*/}
-      {/*            )*/}
-      {/*        )*/}
-      {/*    }*/}
-      {/*    className="w-full p-2 border rounded text-sm"*/}
-      {/*/>*/}
-      {/*                    <button*/}
-      {/*                        onClick={() => handleCommentSubmit(post._id, post.newComment)}*/}
-      {/*                        className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"*/}
-      {/*                    >*/}
-      {/*                      Publier*/}
-      {/*                    </button>*/}
-                        </div>
+                        <Post>
+                          <Post.Header
+                              username={post.username}
+                              avatar={post.avatar}
+                              createdAt={post.createdAt}
+                          />
+                          <Post.Body content={post.content} />
+                          <Post.Footer
+                              post={post}
+                              currentUserId={userId}
+                              onLike={handleLike}
+                              onCommentClick={fetchComments}
+                              onEdit={handleEdit}       // tu pourras gérer ça ensuite
+                              onDelete={handleDelete}   // idem
+                          />
+                        </Post>
                       </motion.div>
                   ))}
                 </div>
@@ -419,22 +163,27 @@ export default function DashboardPage() {
           </div>
         </div>
         {selectedPost && (
-            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+            <div
+                key={selectedPost._id + '-' + selectedPost.comments?.length}
+                className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+            >
+              <div
+                  key={selectedPost._id + '-' + selectedPost.comments?.length}
+                  className="bg-white rounded-lg p-6 max-w-md w-full relative"
+              >
                 <h2 className="text-lg font-bold mb-4">Commentaires</h2>
 
                 <div className="max-h-60 overflow-y-auto space-y-2">
                   {selectedPost.comments?.map((comment) => (
                       <CommentThread
-                          key={comment._id}
+                          key={comment._id + '-' + comment.replies?.length}
                           comment={comment}
                           depth={0}
                           onReply={(parentId, content) =>
                               handleCommentSubmit(selectedPost._id, content, parentId)
                           }
                       />
-                  ))
-                  }
+                  ))}
 
                 </div>
 

@@ -1,18 +1,39 @@
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
+import Post from "@/components/Post";
+import {usePostActions} from "@/hooks/usePostActions";
+import CommentThread from '@/components/CommentThread';
+
 
 export default function ProfilePage() {
     const [user, setUser] = useState(null);
-    const [followStats, setFollowStats] = useState({ followers: 0, following: 0 });
-    const [mounted, setMounted] = useState(false);
     const [posts, setPosts] = useState([]);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [popupComment, setPopupComment] = useState("");
+    const [followStats, setFollowStats] = useState({ followers: 0, following: 0 });
+
+
+    const userId = user?._id;
+
+    const {
+        handleLike,
+        fetchComments,
+        handleEdit,
+        handleDelete,
+        handleCommentSubmit,
+    } = usePostActions({
+        userId,
+        posts,
+        setPosts,
+        setSelectedPost,
+        selectedPost,
+        setPopupComment,
+    });
+
+
+
 
     useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    useEffect(() => {
-        if (!mounted) return;
 
         const fetchProfile = async () => {
             try {
@@ -35,7 +56,7 @@ export default function ProfilePage() {
         };
 
         fetchProfile();
-    }, [mounted]);
+    }, []);
 
     useEffect(() => {
         if (!user?._id) return;
@@ -76,7 +97,14 @@ export default function ProfilePage() {
 
         const fetchUserPosts = async () => {
             try {
-                const res = await fetch(`http://localhost:4006/api/posts/user/${user._id}`);
+                const token = localStorage.getItem("token");
+
+                const res = await fetch(`http://localhost:4000/api/feed/${user._id}?authorOnly=true`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
                 const data = await res.json();
 
                 if (!res.ok) throw new Error(data.message || "Erreur chargement posts");
@@ -91,11 +119,11 @@ export default function ProfilePage() {
 
     }, [user]);
 
-    if (!mounted || !user) return <p>Chargement...</p>;
+    if (!user) return <p>Chargement...</p>;
 
     return (
         <Layout>
-        <div className="max-w-md mx-auto mt-6 p-4 border rounded shadow bg-white">
+        <div className="max-w-2xl mx-auto mt-6 p-4 border rounded shadow bg-white">
             <div className="flex items-center space-x-4">
                 <img
                     src={`http://localhost:4005${user.avatar}`}
@@ -116,21 +144,74 @@ export default function ProfilePage() {
                 Inscrit le {new Date(user.createdAt).toLocaleDateString()}
             </p>
         </div>
-            <div className="max-w-md mx-auto mt-6 p-4 bg-white border rounded shadow">
+            <div className="max-w-2xl mx-auto mt-6 p-4 bg-white border rounded shadow">
                 <h3 className="text-lg font-semibold mb-2">Mes publications</h3>
                 {posts.length > 0 ? (
                     posts.map((post) => (
-                        <div key={post._id} className="border-b py-2">
-                            <p>{post.content}</p>
-                            <p className="text-xs text-gray-400">
-                                {new Date(post.createdAt).toLocaleString()}
-                            </p>
-                        </div>
+                        <Post key={post._id}>
+                            <Post.Header
+                                username={post.username}
+                                avatar={post.avatar}
+                                createdAt={post.createdAt}
+                            />                            <Post.Body content={post.content} />
+                            <Post.Footer
+                                post={post}
+                                currentUserId={userId}
+                                onLike={handleLike}
+                                onCommentClick={fetchComments}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
+                        </Post>
                     ))
                 ) : (
                     <p className="text-gray-500">Aucune publication trouvée.</p>
                 )}
+
             </div>
+            {selectedPost && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+                        <h2 className="text-lg font-bold mb-4">Commentaires</h2>
+
+                        <div className="max-h-60 overflow-y-auto space-y-2">
+                            {selectedPost.comments?.map((comment) => (
+                                <CommentThread
+                                    key={comment._id}
+                                    comment={comment}
+                                    depth={0}
+                                    onReply={(parentId, content) =>
+                                        handleCommentSubmit(selectedPost._id, content, parentId)
+                                    }
+                                />
+                            ))}
+                        </div>
+
+                        <textarea
+                            rows={2}
+                            placeholder="Ajouter un commentaire..."
+                            value={popupComment}
+                            onChange={(e) => setPopupComment(e.target.value)}
+                            className="w-full mt-4 p-2 border rounded text-sm"
+                        />
+
+                        <button
+                            onClick={() => handleCommentSubmit(selectedPost._id, popupComment)}
+                            className="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                        >
+                            Publier
+                        </button>
+
+                        <button
+                            onClick={() => setSelectedPost(null)}
+                            className="absolute top-2 right-3 text-gray-600 hover:text-gray-900 text-lg"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
+
         </Layout>
     );
 }

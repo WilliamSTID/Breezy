@@ -6,16 +6,23 @@ const router = express.Router();
 router.get('/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
+    const authorOnly = req.query.authorOnly === 'true';
 
-    // 1. Récupérer les followings de l'utilisateur
-    const followersRes = await axios.get(`http://followers:4002/following/${userId}`);
-    const followings = [...new Set([...followersRes.data.map(f => f.user), userId])];
+    let postFilterIds;
 
-    if (followings.length === 0) return res.json([]);
+    if (authorOnly) {
+      postFilterIds = [userId];
+    } else {
+      // 1. Récupérer les followings de l'utilisateur
+      const followersRes = await axios.get(`http://followers:4002/following/${userId}`);
+      postFilterIds = [...new Set([...followersRes.data.map(f => f.user), userId])];
+    }
 
-    // 2. Récupérer les posts des followings
+    if (postFilterIds.length === 0) return res.json([]);
+
+    // 2. Récupérer les posts des followings ou de l'utilisateur
     const postsRes = await axios.post('http://post:4006/api/posts/users', {
-      userIds: followings
+      userIds: postFilterIds
     });
 
     const posts = postsRes.data;
@@ -32,27 +39,35 @@ router.get('/:userId', async (req, res) => {
     // 4. Récupérer les likes spécifiques de l'utilisateur
     const userLikesRes = await axios.post('http://interaction:4007/query', {
       userId,
-      postIds: posts.map(p => p._id)
-
+      postIds
     });
     const likedPostIds = new Set(userLikesRes.data.map(like => like.postId));
 
+    // 5. Récupérer le nombre de commentaires
     const commentCounts = await axios.post('http://interaction:4007/comments/count', {
-      postIds: posts.map(p => p._id),
+      postIds
     });
-
     const commentMap = new Map(commentCounts.data.map(c => [c.postId, c.count]));
 
-    // 5. Fusionner les infos dans chaque post
+    // 6. Récupérer les infos utilisateurs (username, avatar)
+    const authors = [...new Set(posts.map(p => p.author))];
+    const usersRes = await axios.post("http://useraccount:4004/users/batch", {
+      userIds: authors
+    });
+    const users = usersRes.data;
+    const userMap = new Map(Object.entries(users));
+
+    // 7. Fusionner les infos dans chaque post
     const postsWithDetails = posts.map(post => ({
       ...post,
       likes: likeMap.get(post._id) || 0,
       liked: likedPostIds.has(post._id),
       commentCount: commentMap.get(post._id) || 0,
+      username: userMap.get(post.author)?.username || "Inconnu",
+      avatar: userMap.get(post.author)?.avatar || "",
     }));
 
-
-    // 6. Trier par date décroissante
+    // 8. Trier par date décroissante
     postsWithDetails.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     res.json(postsWithDetails);
@@ -60,9 +75,9 @@ router.get('/:userId', async (req, res) => {
     console.error("Erreur dans /feed/:userId :", err);
     res.status(500).json({
       error: 'Erreur lors de la récupération du feed',
-      // details: err.message,
-      erreur: err});
-    }
+      erreur: err
+    });
+  }
 });
 
 module.exports = router;
