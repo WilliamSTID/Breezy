@@ -146,7 +146,7 @@ const SearchUserBar = () => {
                                     className="p-2 hover:bg-gray-50 flex justify-between items-center"
                                 >
                                     <Link
-                                        href={`/users/${user._id}`}
+                                        href={isSelf ? "/profile" : `/user/${user._id}`}
                                         className="flex items-center gap-2"
                                     >
                                         <img

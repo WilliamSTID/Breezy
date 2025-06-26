@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userProfileMiddleware = require('../middlewares/userProfile.controller');
 const User = require("../models/User");
+require('dotenv').config();
 
 const userProfileController = require('../controllers/userProfile.controller.js');
 const UserProfile = require('../models/UserProfile'); 
