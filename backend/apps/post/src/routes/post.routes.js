@@ -2,6 +2,7 @@ const express = require("express");
 const postController = require('../controllers/post.controllers');
 const router = express.Router();
 const mongoose = require("mongoose");
+const checkAuth = require("../middlewares/checkAuth");
 
 const Post = require('../models/Post');
 
@@ -11,8 +12,8 @@ const Post = require('../models/Post');
 //Création des API CRUD
 router.get("/", postController.getPosts);
 router.post("/", postController.setPosts);
-router.put("/:id", postController.editPost);
-router.delete("/:id", postController.deletePost);
+router.put("/:id", checkAuth, postController.editPost);
+router.delete("/:id", checkAuth, postController.deletePost);
 
 
 router.post('/users', async (req, res) => {

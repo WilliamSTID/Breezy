@@ -97,13 +97,71 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
         }
     };
 
-    const handleEdit = (post) => {
-        console.log("Édition du post :", post);
+    const handleEdit = async (postId, newContent) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            router.push("/login");
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/posts/${postId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ content: newContent }),
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                console.error("Erreur lors de la modification :", error.message);
+                return;
+            }
+
+            const { post } = await res.json();
+
+            // Mettre à jour le state local
+            setPosts((prevPosts) =>
+                prevPosts.map((p) => (p._id === postId ? post : p))
+            );
+        } catch (err) {
+            console.error("Erreur réseau lors de la modification :", err);
+        }
     };
 
-    const handleDelete = (postId) => {
-        console.log("Suppression du post :", postId);
+
+    const handleDelete = async (postId) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.warn("Token manquant. Redirection vers login.");
+            router.push("/login");
+            return;
+        }
+
+        try {
+            console.log(token)
+            const res = await fetch(`http://localhost:4000/api/posts/${postId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                console.error("Erreur lors de la suppression :", error.message);
+                return;
+            }
+
+            // Mise à jour locale du state après suppression
+            setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+        } catch (err) {
+            console.error("Erreur réseau lors de la suppression :", err);
+        }
     };
+
 
     const handlePostSubmit = async (content) => {
         if (!content?.trim()) return;

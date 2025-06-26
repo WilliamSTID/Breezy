@@ -8,6 +8,8 @@ export default function PostFooter({
                                        onEdit,
                                        onDelete,
                                    }) {
+    const isAuthor = post.author?.toString() === currentUserId;
+
     return (
         <div className="mt-3">
             <div className="flex gap-6 text-gray-500 text-sm">
@@ -32,12 +34,22 @@ export default function PostFooter({
                 </button>
             </div>
 
-            {post.author === currentUserId && (
+            {isAuthor && (
                 <div className="flex gap-4 mt-2 text-xs text-gray-500">
-                    <button onClick={() => onEdit(post)} className="hover:text-blue-600 flex items-center gap-1">
+                    <button
+                        onClick={() => onEdit(post)}
+                        className="hover:text-blue-600 flex items-center gap-1"
+                    >
                         <Edit size={14} /> Modifier
                     </button>
-                    <button onClick={() => onDelete(post._id)} className="hover:text-red-600 flex items-center gap-1">
+                    <button
+                        onClick={() => {
+                            if (window.confirm("Voulez-vous vraiment supprimer ce post ?")) {
+                                onDelete(post._id);
+                            }
+                        }}
+                        className="hover:text-red-600 flex items-center gap-1"
+                    >
                         <Trash size={14} /> Supprimer
                     </button>
                 </div>

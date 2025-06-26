@@ -44,29 +44,46 @@ module.exports.setPosts=async(req,res)=>{
       }
 };
 
-//Module pour modifier les données
-module.exports.editPost=async(req,res)=>{
-    //identification du post à modifier,renseigner id dans l'url
-    const post=await PostModel.findById(req.params.id)
-    if (!post){
-        res.status(400).json({message:"Post inexsitant"})
+// Modifier un post
+module.exports.editPost = async (req, res) => {
+    try {
+        const post = await PostModel.findById(req.params.id);
+        if (!post) return res.status(404).json({ message: "Post inexistant" });
 
+        // Vérifier que l'utilisateur connecté est bien l'auteur
+        if (post.author.toString() !== req.user.id)
+        {
+            return res.status(403).json({ message: "Non autorisé à modifier ce post" });
+        }
+
+        const updatePost = await PostModel.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        res.status(200).json(updatePost);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
-    const updatePost= await PostModel.findByIdAndUpdate(post,req.body,{
-        new:true
-    });
-    res.status(200).json(updatePost);
 };
 
-//suppression d'un post
+// Supprimer un post
 module.exports.deletePost = async (req, res) => {
-    const post = await PostModel.findById(req.params.id);
-    if (!post) {
-        return res.status(404).json({ message: "Post inexistant" });
-    }
+    try {
+        const post = await PostModel.findById(req.params.id);
+        if (!post) return res.status(404).json({ message: "Post inexistant" });
 
-    await PostModel.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Post supprimé avec succès" });
+        // Vérification d'identité de l'auteur
+        if (post.author.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Non autorisé à supprimer ce post" });
+        }
+
+        await PostModel.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: "Post supprimé avec succès" });
+    } catch (err) {
+        res.status(500).json({ message: err.message,
+        "erreur":err});
+    }
 };
 
 // // Récupérer les posts par utilisateur
