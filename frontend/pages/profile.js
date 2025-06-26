@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import Post from "@/components/Post";
-import {usePostActions} from "@/hooks/usePostActions";
+import { usePostActions } from "@/hooks/usePostActions";
 import CommentThread from '@/components/CommentThread';
-
 
 export default function ProfilePage() {
     const [user, setUser] = useState(null);
@@ -12,7 +11,6 @@ export default function ProfilePage() {
     const [popupComment, setPopupComment] = useState("");
     const [followStats, setFollowStats] = useState({ followers: 0, following: 0 });
     const [editingPostId, setEditingPostId] = useState(null);
-
 
     const userId = user?._id;
 
@@ -31,11 +29,7 @@ export default function ProfilePage() {
         setPopupComment,
     });
 
-
-
-
     useEffect(() => {
-
         const fetchProfile = async () => {
             try {
                 const token = localStorage.getItem("token");
@@ -69,14 +63,10 @@ export default function ProfilePage() {
 
                 const [followersRes, followingRes] = await Promise.all([
                     fetch(`http://localhost:4000/api/followers/follower/${user._id}`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
+                        headers: { Authorization: `Bearer ${token}` },
                     }),
-                    fetch(`http://localhost:4000/api/followers/following/${user._id}`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
+                    fetch(`http://localhost:4000/api/followers/following-list/${user._id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
                     }),
                 ]);
 
@@ -117,34 +107,34 @@ export default function ProfilePage() {
 
         fetchFollowStats();
         fetchUserPosts();
-
     }, [user]);
 
     if (!user) return <p>Chargement...</p>;
 
     return (
         <Layout>
-        <div className="max-w-2xl mx-auto mt-6 p-4 border rounded shadow bg-white">
-            <div className="flex items-center space-x-4">
-                <img
-                    src={`http://localhost:4005${user.avatar}`}
-                    alt={user.username}
-                    className="w-24 h-24 rounded-full"
-                />
-                <div>
-                    <h2 className="text-xl font-bold">{user.name}</h2>
-                    <p className="text-gray-500">@{user.username}</p>
+            <div className="max-w-2xl mx-auto mt-6 p-4 border rounded shadow bg-white">
+                <div className="flex items-center space-x-4">
+                    <img
+                        src={`http://localhost:4005${user.avatar}`}
+                        alt={user.username}
+                        className="w-24 h-24 rounded-full"
+                    />
+                    <div>
+                        <h2 className="text-xl font-bold">{user.name}</h2>
+                        <p className="text-gray-500">@{user.username}</p>
+                    </div>
                 </div>
+                <p className="mt-4">{user.bio}</p>
+                <div className="mt-4 flex space-x-6 text-sm text-gray-700">
+                    <p><strong>{followStats.following}</strong> abonnements</p>
+                    <p><strong>{followStats.followers}</strong> abonnés</p>
+                </div>
+                <p className="mt-2 text-sm text-gray-400">
+                    Inscrit le {new Date(user.createdAt).toLocaleDateString()}
+                </p>
             </div>
-            <p className="mt-4">{user.bio}</p>
-            <div className="mt-4 flex space-x-6 text-sm text-gray-700">
-                <p><strong>{followStats.following}</strong> abonnements</p>
-                <p><strong>{followStats.followers}</strong> abonnés</p>
-            </div>
-            <p className="mt-2 text-sm text-gray-400">
-                Inscrit le {new Date(user.createdAt).toLocaleDateString()}
-            </p>
-        </div>
+
             <div className="max-w-2xl mx-auto mt-6 p-4 bg-white border rounded shadow">
                 <h3 className="text-lg font-semibold mb-2">Mes publications</h3>
                 {posts.length > 0 ? (
@@ -170,13 +160,12 @@ export default function ProfilePage() {
                             onEdit={() => setEditingPostId(post._id)}
                             onDelete={handleDelete}
                         />
-
                     ))
                 ) : (
                     <p className="text-gray-500">Aucune publication trouvée.</p>
                 )}
-
             </div>
+
             {selectedPost && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
@@ -219,7 +208,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
             )}
-
         </Layout>
     );
 }

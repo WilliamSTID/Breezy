@@ -7,15 +7,27 @@ router.get('/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
     const authorOnly = req.query.authorOnly === 'true';
+    const token = req.headers.authorization;
 
     let postFilterIds;
 
     if (authorOnly) {
       postFilterIds = [userId];
     } else {
-      // 1. Récupérer les followings de l'utilisateur
-      const followersRes = await axios.get(`http://followers:4002/following/${userId}`);
-      postFilterIds = [...new Set([...followersRes.data.map(f => f.user), userId])];
+      if (!token) return res.status(401).json({ error: "Token manquant pour récupérer les followings" });
+
+      try {
+        const followersRes = await axios.get(`http://followers:4002/following`, {
+          headers: { Authorization: token },
+        });
+        postFilterIds = [...new Set([...followersRes.data.map(f => f.user), userId])];
+      } catch (err) {
+        console.error("🔴 Erreur depuis followers service :", err.response?.data || err.message);
+        return res.status(err.response?.status || 500).json({
+          error: "Erreur lors de la récupération des followings",
+          details: err.response?.data || err.message,
+        });
+      }
     }
 
     if (postFilterIds.length === 0) return res.json([]);
