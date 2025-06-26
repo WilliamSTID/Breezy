@@ -4,7 +4,7 @@ const User = require('../models/User.js');
 const router = express.Router();
 
 // Liste tous les utilisateurs
-router.get('/users', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const users = await User.find({}, '-password');
     res.json(users);
@@ -13,48 +13,27 @@ router.get('/users', async (req, res) => {
   }
 });
 
+router.get('/search', async (req, res) => {
+  const query = req.query.query;
+  if (!query) return res.status(400).json({ error: 'Requête vide' });
+
+  try {
+    const regex = new RegExp(query, 'i');
+    const users = await User.find({
+      $or: [
+        { username: { $regex: regex } },
+        { name: { $regex: regex } }
+      ]
+    }).select('username name avatar');
+
+    res.json(users);
+  } catch (err) {
+    console.error("🔴 Erreur dans /users/search :", err); // ⬅️ AJOUTE CECI
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // Met à jour un utilisateur par son ID
-router.put('/users/:id', async (req, res) => {
-  try {
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true, select: '-password' }
-    );
-    if (!updatedUser) return res.status(404).json({ error: 'Utilisateur non trouvé' });
-    res.json(updatedUser);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Supprime un utilisateur par son ID
-router.delete('/users/:id', async (req, res) => {
-  try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id);
-    if (!deletedUser) return res.status(404).json({ error: 'Utilisateur non trouvé' });
-    res.json({ message: 'Utilisateur supprimé' });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-router.get("/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id)
-        .select("username name bio avatar createdAt");
-
-    if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
-    }
-
-    res.json(user);
-  } catch (err) {
-    console.error("Erreur lors de la récupération du profil :", err);
-    res.status(500).json({ message: "Erreur serveur" });
-  }
-});
-
 router.post("/batch", async (req, res) => {
   try {
     const { userIds } = req.body;
@@ -84,6 +63,49 @@ router.post("/batch", async (req, res) => {
   }
 });
 
+// Supprime un utilisateur par son ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    if (!deletedUser) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    res.json({ message: 'Utilisateur supprimé' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true, runValidators: true, select: '-password' }
+    );
+    if (!updatedUser) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
+
+  try {
+    const user = await User.findById(req.params.id)
+        .select("username name bio avatar createdAt");
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Erreur lors de la récupération du profil :", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
 
 module.exports = router;

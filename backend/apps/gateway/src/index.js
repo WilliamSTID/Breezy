@@ -83,7 +83,7 @@ const serviceRoutes = [
 
   {
     path: '/api/account',
-    target: 'http://useraccount:4004/useraccount',
+    target: 'http://useraccount:4004',
     pathRewrite: { '^/api/account': '' },
     onProxyReq: (proxyReq, req) => {
       if (req.user?.id) {

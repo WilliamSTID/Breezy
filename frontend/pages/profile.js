@@ -129,7 +129,7 @@ export default function ProfilePage() {
                 <img
                     src={`http://localhost:4005${user.avatar}`}
                     alt={user.username}
-                    className="w-16 h-16 rounded-full"
+                    className="w-24 h-24 rounded-full"
                 />
                 <div>
                     <h2 className="text-xl font-bold">{user.name}</h2>

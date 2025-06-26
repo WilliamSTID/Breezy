@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useState } from "react";
+import axios from "axios";
+import SearchUserBar from "@/components/SearchUserBar"; // ajuste le chemin si besoin
+
 
 export default function Layout({ children }) {
   const router = useRouter();
@@ -20,6 +24,10 @@ export default function Layout({ children }) {
           >
             Breezy
           </Link>
+
+          <SearchUserBar />
+
+
           <div className="flex items-center gap-4 text-sm font-medium">
             <Link href="/dashboard" className="text-gray-700 hover:text-blue-600 transition">
               Accueil
@@ -35,7 +43,7 @@ export default function Layout({ children }) {
             </button>
           </div>
         </nav>
-
+        
         <main className="px-4 py-6">{children}</main>
       </div>
   );

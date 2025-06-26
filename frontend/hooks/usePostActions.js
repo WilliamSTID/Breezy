@@ -137,7 +137,6 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
         }
     };
 
-
     const handleDelete = async (postId) => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -167,7 +166,6 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
             console.error("Erreur réseau lors de la suppression :", err);
         }
     };
-
 
     const handlePostSubmit = async (content) => {
         if (!content?.trim()) return;
