@@ -1,0 +1,518 @@
+# MongoDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: breezy-mongo
+  template:
+    metadata:
+      labels:
+        app: breezy-mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      volumes:
+        - name: mongo-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: breezy-mongo
+---
+# Backend Example (gateway)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-gateway
+  template:
+    metadata:
+      labels:
+        app: breezy-gateway
+    spec:
+      containers:
+        - name: breezy-gateway
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-gateway:latest
+          ports:
+            - containerPort: 4000
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-gateway-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: breezy-gateway
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 4000
+---
+# Frontend Example
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-frontend
+  template:
+    metadata:
+      labels:
+        app: breezy-frontend
+    spec:
+      containers:
+        - name: breezy-frontend
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-frontend:latest
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-frontend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: breezy-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+# Authentification microservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-authentification
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-authentification
+  template:
+    metadata:
+      labels:
+        app: breezy-authentification
+    spec:
+      containers:
+        - name: breezy-authentification
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-authentification:latest
+          ports:
+            - containerPort: 4005
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-authentification-service
+spec:
+  selector:
+    app: breezy-authentification
+  ports:
+    - protocol: TCP
+      port: 4005
+      targetPort: 4005
+---
+# Feed microservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-feed
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-feed
+  template:
+    metadata:
+      labels:
+        app: breezy-feed
+    spec:
+      containers:
+        - name: breezy-feed
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-feed:latest
+          ports:
+            - containerPort: 4008
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-feed-service
+spec:
+  selector:
+    app: breezy-feed
+  ports:
+    - protocol: TCP
+      port: 4008
+      targetPort: 4008
+---
+# Followers microservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-followers
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-followers
+  template:
+    metadata:
+      labels:
+        app: breezy-followers
+    spec:
+      containers:
+        - name: breezy-followers
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-followers:latest
+          ports:
+            - containerPort: 4002
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-followers-service
+spec:
+  selector:
+    app: breezy-followers
+  ports:
+    - protocol: TCP
+      port: 4002
+      targetPort: 4002
+---
+# Interaction microservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-interaction
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-interaction
+  template:
+    metadata:
+      labels:
+        app: breezy-interaction
+    spec:
+      containers:
+        - name: breezy-interaction
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-interaction:latest
+          ports:
+            - containerPort: 4007
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-interaction-service
+spec:
+  selector:
+    app: breezy-interaction
+  ports:
+    - protocol: TCP
+      port: 4007
+      targetPort: 4007
+---
+# Post microservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-post
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-post
+  template:
+    metadata:
+      labels:
+        app: breezy-post
+    spec:
+      containers:
+        - name: breezy-post
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-post:latest
+          ports:
+            - containerPort: 4006
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-post-service
+spec:
+  selector:
+    app: breezy-post
+  ports:
+    - protocol: TCP
+      port: 4006
+      targetPort: 4006
+---
+# PublicProfile microservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-publicprofile
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-publicprofile
+  template:
+    metadata:
+      labels:
+        app: breezy-publicprofile
+    spec:
+      containers:
+        - name: breezy-publicprofile
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-publicprofile:latest
+          ports:
+            - containerPort: 4001
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-publicprofile-service
+spec:
+  selector:
+    app: breezy-publicprofile
+  ports:
+    - protocol: TCP
+      port: 4001
+      targetPort: 4001
+---
+# UserAccount microservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-useraccount
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-useraccount
+  template:
+    metadata:
+      labels:
+        app: breezy-useraccount
+    spec:
+      containers:
+        - name: breezy-useraccount
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-useraccount:latest
+          ports:
+            - containerPort: 4004
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-useraccount-service
+spec:
+  selector:
+    app: breezy-useraccount
+  ports:
+    - protocol: TCP
+      port: 4004
+      targetPort: 4004
+---
+# UserProfile microservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezy-userprofile
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breezy-userprofile
+  template:
+    metadata:
+      labels:
+        app: breezy-userprofile
+    spec:
+      containers:
+        - name: breezy-userprofile
+          image: 843170960259.dkr.ecr.eu-west-1.amazonaws.com/breezy-userprofile:latest
+          ports:
+            - containerPort: 4003
+          env:
+            - name: MONGO_URI
+              value: "mongodb://breezy-mongo:27017/breezy"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: breezy-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezy-userprofile-service
+spec:
+  selector:
+    app: breezy-userprofile
+  ports:
+    - protocol: TCP
+      port: 4003
+      targetPort: 4003
