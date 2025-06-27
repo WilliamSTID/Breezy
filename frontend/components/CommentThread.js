@@ -15,7 +15,7 @@ export default function CommentThread({ comment, depth = 0, onReply }) {
     return (
         <div className="border-l pl-4 mb-2" style={{ marginLeft: depth * 12 }}>
             <p className="text-sm text-gray-700">
-                <strong>{comment.author?.username || "Utilisateur"}</strong> : {comment.content}
+                <strong>{comment.author?.name || "Utilisateur"}</strong> : {comment.content}
             </p>
             <button
                 onClick={() => setReplying(!replying)}

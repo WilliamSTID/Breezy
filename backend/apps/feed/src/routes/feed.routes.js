@@ -75,7 +75,7 @@ router.get('/:userId', async (req, res) => {
       likes: likeMap.get(post._id) || 0,
       liked: likedPostIds.has(post._id),
       commentCount: commentMap.get(post._id) || 0,
-      username: userMap.get(post.author)?.username || "Inconnu",
+      name: userMap.get(post.author)?.name || "Inconnu",
       avatar: userMap.get(post.author)?.avatar || "",
     }));
 

@@ -157,9 +157,9 @@ const SearchUserBar = () => {
                                             className="rounded-full"
                                         />
                                         <div>
-                                            <span className="font-semibold">{user.username}</span>{" "}
+                                            <span className="font-semibold">{user.name}</span>{" "}
                                             <span className="text-sm text-gray-500">
-                        ({user.name})
+                        (@{user.username})
                     </span>
                                         </div>
                                     </Link>

@@ -19,7 +19,7 @@ export default function Post({
     return (
         <div className="bg-white p-4 rounded-xl shadow hover:shadow-md transition">
             <PostHeader
-                username={post.username}
+                name={post.name}
                 avatar={post.avatar}
                 createdAt={post.createdAt}
             />

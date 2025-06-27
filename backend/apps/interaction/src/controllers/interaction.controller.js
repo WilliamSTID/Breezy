@@ -12,7 +12,7 @@ exports.addComment = async (req, res) => {
   try {
     const comment = new Comment({ postId, author, content, parentComment });
     const saved = await comment.save();
-    await saved.populate("author", "username"); // 🔥 Ajout ici
+    await saved.populate("author", "username name");
     res.status(201).json(saved);
   } catch (err) {
     console.error("Erreur addComment:", err);
@@ -126,7 +126,7 @@ exports.getCommentsForPost = async (req, res) => {
       // parentComment: null
     })
         .sort({ createdAt: 1 })
-        .populate('author', 'username');
+        .populate('author', 'username name');
 
     res.json(comments);
   } catch (err) {

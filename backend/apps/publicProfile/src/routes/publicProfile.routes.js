@@ -19,7 +19,7 @@ router.get('/publicprofiles', async (req, res) => {
 // Récupérer le profil public par userId
 router.get('/:userId', async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId).select('username bio avatar');
+    const user = await User.findById(req.params.userId).select('username name bio avatar');
     if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
     res.json(user);
   } catch (err) {
@@ -34,7 +34,7 @@ router.get('/:userId/posts', async (req, res) => {
     const token = req.headers.authorization?.split(" ")[1];
 
     const posts = await Post.find({ author: userId })
-        .populate('author', 'username avatar')
+        .populate('author', 'username name avatar')
         .sort({ createdAt: -1 })
         .lean();
 

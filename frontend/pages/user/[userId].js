@@ -62,7 +62,7 @@ export default function PublicProfilePage() {
 
                 const enrichedPosts = postData.map(post => ({
                     ...post,
-                    username: userData.username,
+                    name: userData.name,
                     avatar: userData.avatar,
                 }));
 
@@ -125,7 +125,8 @@ export default function PublicProfilePage() {
                         className="w-24 h-24 rounded-full"
                     />
                     <div>
-                        <h2 className="text-xl font-bold">@{user.username}</h2>
+                        <h2 className="text-xl font-bold">{user.name}</h2>
+                        <p className="text-gray-500">@{user.username}</p>
                         {user.bio && <p className="text-gray-500">{user.bio}</p>}
                     </div>
                 </div>
