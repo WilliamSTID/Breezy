@@ -108,6 +108,52 @@ export default function PublicProfilePage() {
         fetchFollowStats();
     }, [userId]);
 
+    const handleFollowToggle = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = isFollowing
+                ? `http://localhost:4000/api/followers/unfollow/${userId}`
+                : `http://localhost:4000/api/followers/follow/${userId}`;
+
+            const method = isFollowing ? "DELETE" : "POST";
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!res.ok) throw new Error("Erreur lors du suivi");
+
+            setIsFollowing(!isFollowing);
+            setFollowStats(prev => ({
+                ...prev,
+                followers: isFollowing ? prev.followers - 1 : prev.followers + 1,
+            }));
+        } catch (err) {
+            console.error("Erreur abonnement :", err.message);
+        }
+    };
+
+    useEffect(() => {
+        const checkIfFollowing = async () => {
+            if (!userId || !currentUserId) return;
+            try {
+                const token = localStorage.getItem("token");
+                const res = await fetch(`http://localhost:4000/api/followers/following/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                setIsFollowing(data.isFollowing);
+            } catch (err) {
+                console.error("Erreur vérification abonnement :", err.message);
+            }
+        };
+        checkIfFollowing();
+    }, [userId, currentUserId]);
+
 
     if (user === null) {
         return <p className="text-center mt-10 text-red-500">Profil introuvable.</p>;
@@ -134,6 +180,15 @@ export default function PublicProfilePage() {
                                 <p className="text-sm text-gray-600 mt-1 whitespace-pre-line">{user.bio}</p>
                             )}
                         </div>
+                        {currentUserId !== userId && (
+                            <button
+                                onClick={handleFollowToggle}
+                                className={`mt-2 px-4 py-1 rounded-full text-sm font-medium transition 
+            ${isFollowing ? "bg-gray-300 text-gray-800 hover:bg-gray-400" : "bg-blue-600 text-white hover:bg-blue-700"}`}
+                            >
+                                {isFollowing ? "Se désabonner" : "S'abonner"}
+                            </button>
+                        )}
                     </div>
                 </div>
 
