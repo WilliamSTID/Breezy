@@ -117,10 +117,20 @@ export default function DashboardPage() {
             <textarea
                 value={newPost}
                 onChange={(e) => setNewPost(e.target.value)}
+                maxLength={280}
                 placeholder="Exprimez-vous..."
                 rows={3}
-                className="w-full resize-none border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-gray-800"
+                className={`w-full resize-none border rounded-lg p-3 focus:outline-none focus:ring-2 text-gray-800 ${
+                    newPost.length === 280 ? "border-red-500 ring-red-300" : "focus:ring-blue-300"
+                }`}
             />
+              <p
+                  className={`text-xs text-right mt-1 ${
+                      newPost.length === 280 ? "text-red-500" : "text-gray-400"
+                  }`}
+              >
+                {newPost.length}/280
+              </p>
               <button
                   type="submit"
                   disabled={posting}

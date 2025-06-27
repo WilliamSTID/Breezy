@@ -36,7 +36,7 @@ export default function Post({
                     </div>
                 </div>
             ) : (
-                <p className="mt-2 text-sm">{post.content}</p>
+                <p className="mt-2 text-sm text-wrap">{post.content}</p>
             )}
 
             <PostFooter

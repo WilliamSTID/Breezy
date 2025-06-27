@@ -31,18 +31,30 @@ module.exports.getPosts = async (req, res) => {
 
 
 //Mise en place d'un message avec la fonction setPosts
-module.exports.setPosts=async(req,res)=>{
+module.exports.setPosts = async (req, res) => {
     try {
-        console.log(req.body);
         const { author, content, title, imageUrl, tags, isPublic } = req.body;
+
+        if (!content || content.trim().length === 0) {
+            return res.status(400).json({ message: "Le contenu du post est requis." });
+        }
+
+        if (content.length > 280) {
+            return res.status(400).json({ message: "Le post ne doit pas dépasser 280 caractères." });
+        }
+
         const post = new PostModel({ author, content, title, imageUrl, tags, isPublic });
         await post.save();
         res.status(201).json(post);
-      } catch (err) {
-        res.status(500).json({ message: "Erreur lors de la création du post.",
-        "erreur":err});
-      }
+    } catch (err) {
+        console.error("Erreur setPosts:", err);
+        res.status(500).json({
+            message: "Erreur lors de la création du post.",
+            erreur: err.message,
+        });
+    }
 };
+
 
 // Modifier un post
 module.exports.editPost = async (req, res) => {
