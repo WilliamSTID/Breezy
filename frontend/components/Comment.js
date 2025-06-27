@@ -99,7 +99,11 @@ export default function Comment({ comment, onReply, onEdit, onDelete, currentUse
                             Modifier
                         </button>
                         <button
-                            onClick={() => onDelete(comment._id)}
+                            onClick={() => {
+                                if (confirm("Es-tu sûr de vouloir supprimer ce commentaire ?")) {
+                                    onDelete(comment._id);
+                                }
+                            }}
                             className="flex items-center gap-1 text-red-600 hover:underline"
                         >
                             <Trash size={14} />

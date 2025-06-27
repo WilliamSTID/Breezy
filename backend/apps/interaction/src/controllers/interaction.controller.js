@@ -192,15 +192,31 @@ exports.updateComment = async (req, res) => {
   }
 };
 
+// Supprime un commentaire et toutes ses réponses
 exports.deleteComment = async (req, res) => {
   const { id } = req.params;
+
   try {
-    const deleted = await Comment.findByIdAndDelete(id);
-    if (!deleted) {
-      return res.status(404).json({ message: "Commentaire non trouvé" });
-    }
-    res.json({ message: "Commentaire supprimé" });
+    const collectNestedIds = async (parentId) => {
+      const children = await Comment.find({ parentComment: parentId });
+      const ids = [parentId];
+
+      for (const child of children) {
+        const childIds = await collectNestedIds(child._id);
+        ids.push(...childIds);
+      }
+
+      return ids;
+    };
+
+    const allToDelete = await collectNestedIds(id);
+
+    await Comment.deleteMany({ _id: { $in: allToDelete } });
+
+    res.json({ message: `Commentaire et ${allToDelete.length - 1} réponses supprimés` });
   } catch (err) {
+    console.error("Erreur deleteComment cascade:", err);
     res.status(500).json({ message: "Erreur serveur", error: err.message });
   }
 };
+

@@ -344,6 +344,24 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
 
     const handleCommentDelete = async (postId, commentId) => {
         const token = localStorage.getItem("token");
+
+          const countCommentsToDelete = (comments) => {
+            for (const comment of comments) {
+                if (comment._id === commentId) {
+                    return countReplies(comment);
+                }
+                const nested = countCommentsToDelete(comment.replies || []);
+                if (nested > 0) return nested;
+            }
+            return 0;
+        };
+
+        const countReplies = (comment) => {
+            if (!comment) return 0;
+            const children = comment.replies || [];
+            return 1 + children.reduce((acc, child) => acc + countReplies(child), 0);
+        };
+
         if (!token) return;
 
         try {
@@ -368,10 +386,24 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
                         replies: deleteInTree(c.replies || []),
                     }));
 
+            const fallbackPost = posts.find(p => p._id === postId);
+            const commentSource = selectedPost?.comments || fallbackPost?.comments || [];
+
+            const countToRemove = countCommentsToDelete(commentSource);
+
+
+            console.log("Commentaires avant suppression", selectedPost?.comments);
+            console.log("ID à supprimer", commentId);
+            console.log("Nombre à retirer :", countToRemove);
+
             setPosts((prev) =>
                 prev.map((post) =>
                     post._id === postId
-                        ? { ...post, comments: deleteInTree(post.comments || []) }
+                        ? {
+                            ...post,
+                            comments: deleteInTree(post.comments || []),
+                            commentCount: Math.max((post.commentCount || 0) - countToRemove, 0)
+                        }
                         : post
                 )
             );
@@ -379,7 +411,11 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
             if (setSelectedPost) {
                 setSelectedPost((prev) =>
                     prev
-                        ? { ...prev, comments: deleteInTree(prev.comments || []) }
+                        ? {
+                            ...prev,
+                            comments: deleteInTree(prev.comments || []),
+                            commentCount: Math.max((prev.commentCount || 0) - countToRemove, 0),
+                        }
                         : prev
                 );
             }
