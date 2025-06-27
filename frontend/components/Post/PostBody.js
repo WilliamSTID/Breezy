@@ -15,5 +15,5 @@ export default function PostBody({ post, isEditing, editContent, setEditContent,
         );
     }
 
-    return <p className="mt-2 text-sm">{post.content}</p>;
+    return <p className="mt-2 text-sm break-words whitespace-pre-wrap">{post.content}</p>;
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PostHeader from "./PostHeader";
 import PostFooter from "./PostFooter";
+import PostBody from "./PostBody"; // ⚠️ N'oublie pas d'importer ton composant
 
 export default function Post({
                                  post,
@@ -23,21 +24,14 @@ export default function Post({
                 createdAt={post.createdAt}
             />
 
-            {isEditing ? (
-                <div className="mt-2">
-          <textarea
-              className="w-full border rounded-md p-2 text-sm"
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-          />
-                    <div className="flex gap-2 mt-1 text-sm text-gray-500">
-                        <button onClick={onSave} className="text-blue-600 hover:underline">Enregistrer</button>
-                        <button onClick={onCancel} className="hover:underline">Annuler</button>
-                    </div>
-                </div>
-            ) : (
-                <p className="mt-2 text-sm text-wrap">{post.content}</p>
-            )}
+            <PostBody
+                post={post}
+                isEditing={isEditing}
+                editContent={editContent}
+                setEditContent={setEditContent}
+                onSave={onSave}
+                onCancel={onCancel}
+            />
 
             <PostFooter
                 post={post}
