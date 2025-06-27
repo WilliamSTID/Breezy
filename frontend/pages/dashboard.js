@@ -230,8 +230,11 @@ export default function DashboardPage() {
 
 
                 <button
-                    onClick={() => handleCommentSubmit(selectedPost._id, popupComment)}
-                className="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                    onClick={() => {
+                      handleCommentSubmit(selectedPost._id, popupComment);
+                      setPopupComment(""); // ⬅️ Vide le textarea après soumission
+                    }}
+                    className="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
                 >
                   Publier
                 </button>

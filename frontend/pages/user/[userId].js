@@ -157,9 +157,9 @@ export default function PublicProfilePage() {
 
             {selectedPost && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white rounded-xl p-2 w-full max-w-3xl relative shadow-lg">
+                    <div className="bg-white rounded-xl p-4 w-full max-w-3xl relative shadow-lg">
                         <h2 className="text-lg font-bold mb-4">Commentaires</h2>
-                        <div className="max-h-60 overflow-y-auto space-y-2">
+                        <div className="max-h-60 p-4 overflow-y-auto space-y-2">
                             {selectedPost.comments?.map((comment) => (
                                 <CommentThread
                                     key={comment._id}
@@ -195,11 +195,19 @@ export default function PublicProfilePage() {
                         </p>
 
                         <button
-                            onClick={() => handleCommentSubmit(selectedPost._id, popupComment)}
-                            className="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                            onClick={() => {
+                                handleCommentSubmit(selectedPost._id, popupComment);
+                                setPopupComment("");
+                            }}
+                            disabled={!popupComment.trim()}
+                            className={`mt-2 w-full py-2 rounded-lg transition 
+                             ${!popupComment.trim()
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-blue-600 text-white hover:bg-blue-700"}`}
                         >
                             Publier
                         </button>
+
                         <button
                             onClick={() => setSelectedPost(null)}
                             className="absolute top-2 right-3 text-gray-600 hover:text-gray-900 text-lg"
