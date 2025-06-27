@@ -186,7 +186,7 @@ export default function DashboardPage() {
             >
               <div
                   key={selectedPost._id + '-' + selectedPost.comments?.length}
-                  className="bg-white rounded-lg p-6 max-w-md w-full relative"
+                  className="bg-white rounded-xl p-2 w-full max-w-3xl relative shadow-lg"
               >
                 <h2 className="text-lg font-bold mb-4">Commentaires</h2>
 

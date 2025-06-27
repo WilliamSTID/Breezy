@@ -186,7 +186,7 @@ export default function ProfilePage() {
 
             {selectedPost && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+                    <div className="bg-white rounded-xl p-2 w-full max-w-3xl relative shadow-lg">
                         <h2 className="text-lg font-bold mb-4">Commentaires</h2>
 
                         <div className="max-h-60 overflow-y-auto space-y-2">
