@@ -25,13 +25,23 @@ export default function CommentThread({ comment, depth = 0, onReply }) {
             </button>
             {replying && (
                 <div className="mt-1">
-          <textarea
-              value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
-              className="w-full p-1 text-sm border rounded"
-              rows={2}
-              placeholder="Votre réponse..."
-          />
+                <textarea
+                    value={replyContent}
+                    maxLength={280}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    className={`w-full p-1 text-sm border rounded ${
+                        replyContent.length === 280 ? "border-red-500" : ""
+                    }`}
+                    rows={2}
+                    placeholder="Votre réponse..."
+                />
+                    <p
+                        className={`text-xs text-right mt-1 ${
+                            replyContent.length === 280 ? "text-red-500" : "text-gray-400"
+                        }`}
+                    >
+                        {replyContent.length}/280
+                    </p>
                     <button
                         onClick={handleReply}
                         className="mt-1 text-sm bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700"
