@@ -6,6 +6,12 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
+const cors = require("cors");
+app.use(cors({
+    origin: "http://localhost:3000", // ✅ ton front
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-User-Id"]
+}));
 
 app.use('/userprofile', userprofileRoutes);
 

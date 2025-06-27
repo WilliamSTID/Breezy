@@ -1,7 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const fs = require("fs");
+const path = require("path");
+const fetch = require("node-fetch");
+const FormData = require("form-data");
+
 const userProfileMiddleware = require('../middlewares/userProfile.controller');
 const User = require("../models/User");
+const upload = require("../middlewares/upload");
+
 require('dotenv').config();
 
 const userProfileController = require('../controllers/userProfile.controller.js');
@@ -81,5 +88,47 @@ router.get("/me", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
+
+router.put("/me", upload.single("avatar"), async (req, res) => {
+  try {
+    const userId = req.header("X-User-Id");
+    if (!userId) return res.status(401).json({ message: "ID utilisateur manquant" });
+
+    const { name, bio } = req.body;
+    const update = { name, bio };
+
+    // Si avatar fourni, on le transfère à authentification
+    if (req.file) {
+      const form = new FormData();
+      form.append("avatar", fs.createReadStream(req.file.path), req.file.originalname);
+
+      const uploadRes = await fetch("http://authentification:4005/internal/avatar-upload", {
+        method: "POST",
+        body: form,
+        headers: {
+          ...form.getHeaders(),
+          "x-api-key": process.env.INTERNAL_API_KEY // si clé API activée
+        },
+      });
+
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error("Échec du transfert de l'avatar");
+
+      update.avatar = uploadData.avatar;
+
+      // Nettoyage fichier temporaire
+      fs.unlink(req.file.path, () => {});
+    }
+
+    const user = await User.findByIdAndUpdate(userId, update, { new: true }).select("username name bio avatar createdAt");
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+
+    res.json(user);
+  } catch (err) {
+    console.error("Erreur PUT /me :", err.message);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
 
 module.exports = router;

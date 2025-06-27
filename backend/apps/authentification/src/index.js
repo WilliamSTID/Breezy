@@ -17,6 +17,9 @@ if (!fs.existsSync(avatarDir)) {
   console.log("📁 Dossier /uploads/avatars créé automatiquement");
 }
 
+const internalRoutes = require("./routes/internal.routes");
+app.use(internalRoutes);
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Middlewares
