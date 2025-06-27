@@ -30,6 +30,8 @@ export default function ProfilePage() {
         handleEdit,
         handleDelete,
         handleCommentSubmit,
+        handleCommentEdit,
+        handleCommentDelete,
     } = usePostActions({
         userId,
         posts,
@@ -198,7 +200,16 @@ export default function ProfilePage() {
                                     onReply={(parentId, content) =>
                                         handleCommentSubmit(selectedPost._id, content, parentId)
                                     }
+                                    onEdit={(commentId, newContent) =>
+                                        handleCommentEdit(commentId, newContent)
+                                    }
+                                    onDelete={(commentId) =>
+                                        handleCommentDelete(selectedPost._id, commentId)
+                                    }
+                                    currentUserId={userId}
                                 />
+
+
                             ))}
                         </div>
 

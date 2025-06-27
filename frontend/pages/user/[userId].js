@@ -21,6 +21,8 @@ export default function PublicProfilePage() {
         handleLike,
         fetchComments,
         handleCommentSubmit,
+        handleCommentEdit,
+        handleCommentDelete,
     } = usePostActions({
         userId: currentUserId,
         posts,
@@ -166,6 +168,13 @@ export default function PublicProfilePage() {
                                     onReply={(parentId, content) =>
                                         handleCommentSubmit(selectedPost._id, content, parentId)
                                     }
+                                    onEdit={(commentId, newContent) =>
+                                        handleCommentEdit(commentId, newContent)
+                                    }
+                                    onDelete={(commentId) =>
+                                        handleCommentDelete(selectedPost._id, commentId)
+                                    }
+                                    currentUserId={currentUserId}
                                 />
                             ))}
                         </div>
