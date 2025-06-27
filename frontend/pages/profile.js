@@ -254,42 +254,54 @@ export default function ProfilePage() {
                 </div>
             )}
             {isEditingProfile && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
-                        <h2 className="text-xl font-bold mb-4">Modifier le profil</h2>
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative p-6 space-y-4">
+                        <h2 className="text-2xl font-semibold text-gray-800">Modifier le profil</h2>
 
-                        <input
-                            className="w-full border p-2 rounded mb-2"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            placeholder="Nom"
-                        />
+                        <div className="space-y-1">
+                            <label className="block text-sm font-medium text-gray-700">Nom</label>
+                            <input
+                                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                placeholder="Nom"
+                            />
+                        </div>
 
-                        <textarea
-                            className="w-full border p-2 rounded mb-2"
-                            value={editBio}
-                            onChange={(e) => setEditBio(e.target.value)}
-                            placeholder="Biographie"
-                        />
+                        <div className="space-y-1">
+                            <label className="block text-sm font-medium text-gray-700">Biographie</label>
+                            <textarea
+                                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={editBio}
+                                onChange={(e) => setEditBio(e.target.value)}
+                                placeholder="Biographie"
+                                rows={3}
+                            />
+                        </div>
 
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setEditAvatar(e.target.files[0])}
-                            className="mb-4"
-                        />
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">Photo de profil</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setEditAvatar(e.target.files[0])}
+                                className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
+                            />
+                        </div>
 
                         {editAvatar && (
-                            <img
-                                src={URL.createObjectURL(editAvatar)}
-                                alt="Aperçu de l'avatar"
-                                className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
-                            />
+                            <div className="flex justify-center">
+                                <img
+                                    src={URL.createObjectURL(editAvatar)}
+                                    alt="Aperçu de l'avatar"
+                                    className="w-24 h-24 rounded-full object-cover border-2 border-blue-500"
+                                />
+                            </div>
                         )}
 
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-end space-x-3 pt-2">
                             <button
-                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                className="bg-blue-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
                                 onClick={async () => {
                                     const token = localStorage.getItem("token");
                                     const formData = new FormData();
@@ -319,7 +331,7 @@ export default function ProfilePage() {
                                 Enregistrer
                             </button>
                             <button
-                                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                                className="bg-gray-200 px-5 py-2 rounded-lg font-medium hover:bg-gray-300 transition"
                                 onClick={() => setIsEditingProfile(false)}
                             >
                                 Annuler
@@ -327,7 +339,7 @@ export default function ProfilePage() {
                         </div>
 
                         <button
-                            className="absolute top-2 right-3 text-gray-500 hover:text-red-500 text-lg"
+                            className="absolute top-3 right-4 text-gray-400 hover:text-red-500 text-xl transition"
                             onClick={() => setIsEditingProfile(false)}
                         >
                             ✕
@@ -335,6 +347,8 @@ export default function ProfilePage() {
                     </div>
                 </div>
             )}
+
+
         </Layout>
     );
 }
