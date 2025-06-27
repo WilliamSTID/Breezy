@@ -186,11 +186,19 @@ export default function ProfilePage() {
 
                         <textarea
                             rows={2}
+                            maxLength={280}
                             placeholder="Ajouter un commentaire..."
                             value={popupComment}
                             onChange={(e) => setPopupComment(e.target.value)}
-                            className="w-full mt-4 p-2 border rounded text-sm"
+                            className={`w-full mt-4 p-2 border rounded text-sm ${
+                                popupComment.length === 280 ? "border-red-500" : ""
+                            }`}
                         />
+                        <p className={`text-xs text-right mt-1 ${
+                            popupComment.length === 280 ? "text-red-500" : "text-gray-400"
+                        }`}>
+                            {popupComment.length}/280
+                        </p>
 
                         <button
                             onClick={() => handleCommentSubmit(selectedPost._id, popupComment)}

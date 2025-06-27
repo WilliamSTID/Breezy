@@ -6,6 +6,9 @@ const mongoose = require('mongoose');
 
 exports.addComment = async (req, res) => {
   const { postId, author, content, parentComment } = req.body;
+  if (!content || content.length > 280) {
+    return res.status(400).json({ message: "Le commentaire ne doit pas dépasser 280 caractères." });
+  }
   try {
     const comment = new Comment({ postId, author, content, parentComment });
     const saved = await comment.save();
