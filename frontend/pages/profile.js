@@ -125,38 +125,44 @@ export default function ProfilePage() {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto mt-6 p-4 border rounded shadow bg-white">
-                <div className="flex items-center space-x-4">
-                    <img
-                        src={`http://localhost:4005${user.avatar}`}
-                        alt={user.username}
-                        className="w-24 h-24 rounded-full"
-                    />
-                    <div>
-                        <h2 className="text-xl font-bold">{user.name}</h2>
-                        <p className="text-gray-500">@{user.username}</p>
+            <div className="max-w-2xl mx-auto mt-6 p-6 border border-gray-200 rounded-2xl shadow-md bg-white hover:shadow-lg transition-shadow duration-300">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <img
+                            src={`http://localhost:4005${user.avatar}`}
+                            alt={user.username}
+                            className="w-24 h-24 rounded-full object-cover border border-gray-300 shadow-sm"
+                        />
+                        <div>
+                            <h2 className="text-2xl font-semibold text-gray-800">{user.name}</h2>
+                            <p className="text-gray-500">@{user.username}</p>
+                        </div>
                     </div>
                     <button
                         onClick={() => startEditingProfile()}
-                        className=" text-gray-500 hover:text-blue-600"
+                        className="text-gray-400 hover:text-blue-500 text-xl transition-colors"
                         title="Modifier le profil"
                     >
                         ✎
                     </button>
-
                 </div>
-                <p className="mt-4">{user.bio}</p>
-                <div className="mt-4 flex space-x-6 text-sm text-gray-700">
-                    <p><strong>{followStats.following}</strong> abonnements</p>
-                    <p><strong>{followStats.followers}</strong> abonnés</p>
+                <p className="mt-4 text-gray-700 whitespace-pre-line">{user.bio}</p>
+                <div className="mt-4 flex space-x-8 text-sm text-gray-600">
+                    <p>
+                        <span className="font-bold text-gray-900">{followStats.following}</span> abonnements
+                    </p>
+                    <p>
+                        <span className="font-bold text-gray-900">{followStats.followers}</span> abonnés
+                    </p>
                 </div>
                 <p className="mt-2 text-sm text-gray-400">
                     Inscrit le {new Date(user.createdAt).toLocaleDateString()}
                 </p>
             </div>
 
-            <div className="max-w-2xl mx-auto mt-6 p-4 bg-white border rounded shadow">
-                <h3 className="text-lg font-semibold mb-2">Mes publications</h3>
+
+            <div className="max-w-2xl mx-auto mt-6 space-y-5">
+                <h3 className="text-lg font-semibold mb-4">Mes publications</h3>
                 {posts.length > 0 ? (
                     posts.map((post) => (
                         <Post

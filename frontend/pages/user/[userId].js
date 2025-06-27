@@ -119,26 +119,35 @@ export default function PublicProfilePage() {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto mt-6 p-4 border rounded shadow bg-white">
-                <div className="flex items-center space-x-4">
-                    <img
-                        src={`http://localhost:4005${user.avatar}`}
-                        alt={user.username}
-                        className="w-24 h-24 rounded-full"
-                    />
-                    <div>
-                        <h2 className="text-xl font-bold">{user.name}</h2>
-                        <p className="text-gray-500">@{user.username}</p>
-                        {user.bio && <p className="text-gray-500">{user.bio}</p>}
+            <div className="max-w-2xl mx-auto mt-6 p-6 border border-gray-200 rounded-2xl shadow-md bg-white hover:shadow-lg transition-shadow duration-300">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <img
+                            src={`http://localhost:4005${user.avatar}`}
+                            alt={user.username}
+                            className="w-24 h-24 rounded-full object-cover border border-gray-300 shadow-sm"
+                        />
+                        <div>
+                            <h2 className="text-2xl font-semibold text-gray-800">{user.name}</h2>
+                            <p className="text-gray-500">@{user.username}</p>
+                            {user.bio && (
+                                <p className="text-sm text-gray-600 mt-1 whitespace-pre-line">{user.bio}</p>
+                            )}
+                        </div>
                     </div>
                 </div>
-                <div className="mt-4 flex space-x-6 text-sm text-gray-700">
-                    <p><strong>{followStats.following}</strong> abonnements</p>
-                    <p><strong>{followStats.followers}</strong> abonnés</p>
+
+                <div className="mt-4 flex space-x-8 text-sm text-gray-600">
+                    <p>
+                        <span className="font-bold text-gray-900">{followStats.following}</span> abonnements
+                    </p>
+                    <p>
+                        <span className="font-bold text-gray-900">{followStats.followers}</span> abonnés
+                    </p>
                 </div>
             </div>
 
-            <div className="max-w-2xl mx-auto mt-6 p-4 bg-white border rounded shadow">
+            <div className="max-w-2xl mx-auto mt-6 space-y-5">
                 <h3 className="text-lg font-semibold mb-2">Publications</h3>
                 {posts.length > 0 ? (
                     posts.map((post) => (
