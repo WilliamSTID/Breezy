@@ -78,7 +78,9 @@ export default function DashboardPage() {
     handleEdit,
     handleDelete,
     handlePostSubmit,
-    handleCommentSubmit
+    handleCommentSubmit,
+    handleCommentEdit,
+    handleCommentDelete,
   } = usePostActions({
     userId,
     posts,
@@ -186,19 +188,25 @@ export default function DashboardPage() {
             >
               <div
                   key={selectedPost._id + '-' + selectedPost.comments?.length}
-                  className="bg-white rounded-xl p-2 w-full max-w-3xl relative shadow-lg"
+                  className="bg-white rounded-xl p-4 w-full max-w-3xl relative shadow-lg"
               >
                 <h2 className="text-lg font-bold mb-4">Commentaires</h2>
 
-                <div className="max-h-60 overflow-y-auto space-y-2">
+                <div className="max-h-60 p-4 overflow-y-auto space-y-2">
                   {selectedPost.comments?.map((comment) => (
                       <CommentThread
-                          key={comment._id + '-' + comment.replies?.length}
                           comment={comment}
                           depth={0}
                           onReply={(parentId, content) =>
                               handleCommentSubmit(selectedPost._id, content, parentId)
                           }
+                          onEdit={(commentId, newContent) =>
+                              handleCommentEdit(commentId, newContent)
+                          }
+                          onDelete={(commentId) =>
+                              handleCommentDelete(selectedPost._id, commentId)
+                          }
+                          currentUserId={userId}
                       />
                   ))}
 

@@ -285,6 +285,110 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
         }
     };
 
+    const handleCommentEdit = async (commentId, newContent) => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/interactions/comment/${commentId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ content: newContent }),
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                console.error("Erreur modification :", error.message);
+                return;
+            }
+
+            const updatedComment = await res.json();
+
+            const updateTree = (comments) =>
+                comments.map((c) =>
+                    c._id === updatedComment._id
+                        ? { ...c, content: updatedComment.content }
+                        : {
+                            ...c,
+                            replies: c.replies ? updateTree(c.replies) : [],
+                        }
+                );
+
+            setPosts((prevPosts) =>
+                selectedPost
+                    ? prevPosts.map((post) =>
+                        post._id === selectedPost._id
+                            ? { ...post, comments: updateTree(post.comments) }
+                            : post
+                    )
+                    : prevPosts
+            );
+
+
+            // mise à jour dans selectedPost (popup)
+            setSelectedPost((prev) =>
+                prev
+                    ? {
+                        ...prev,
+                        comments: updateTree(prev.comments),
+                    }
+                    : null
+            );
+        } catch (err) {
+            console.error("Erreur réseau :", err);
+        }
+    };
+
+    const handleCommentDelete = async (postId, commentId) => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/interactions/comment/${commentId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                console.error("Erreur suppression :", error.message);
+                return;
+            }
+
+            const deleteInTree = (comments) =>
+                comments
+                    .filter((c) => c._id !== commentId)
+                    .map((c) => ({
+                        ...c,
+                        replies: deleteInTree(c.replies || []),
+                    }));
+
+            setPosts((prev) =>
+                prev.map((post) =>
+                    post._id === postId
+                        ? { ...post, comments: deleteInTree(post.comments || []) }
+                        : post
+                )
+            );
+
+            if (setSelectedPost) {
+                setSelectedPost((prev) =>
+                    prev
+                        ? { ...prev, comments: deleteInTree(prev.comments || []) }
+                        : prev
+                );
+            }
+        } catch (err) {
+            console.error("Erreur réseau suppression :", err);
+        }
+    };
+
+
     return {
         handleLike,
         fetchComments,
@@ -292,5 +396,7 @@ export function usePostActions({ userId, posts, setPosts, setSelectedPost, setPo
         handleDelete,
         handlePostSubmit,
         handleCommentSubmit,
+        handleCommentEdit,
+        handleCommentDelete,
     };
 }

@@ -5,6 +5,8 @@ const controller = require('../controllers/interaction.controller');
 router.post('/comment', controller.addComment); // commenter un post ou un commentaire
 router.post('/comments/count', controller.countComments);
 router.get('/comments/:postId', controller.getCommentsForPost);
+router.put("/comment/:id", controller.updateComment);
+router.delete("/comment/:id", controller.deleteComment);
 
 router.post('/like', controller.toggleLike); // liker un post
 router.post('/likes/count', controller.countLikes);

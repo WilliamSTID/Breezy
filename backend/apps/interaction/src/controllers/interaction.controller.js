@@ -165,3 +165,42 @@ exports.countComments = async (req, res) => {
     res.status(500).json({ message: "Erreur lors du comptage des commentaires", error: err.message });
   }
 };
+
+exports.updateComment = async (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+
+  if (!content || content.length > 280) {
+    return res.status(400).json({ message: "Contenu invalide." });
+  }
+
+  try {
+    const updated = await Comment.findByIdAndUpdate(
+        id,
+        { content },
+        { new: true }
+    ).populate("author", "username name avatar");
+
+    if (!updated) {
+      return res.status(404).json({ message: "Commentaire non trouvé." });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Erreur updateComment:", err);
+    res.status(500).json({ message: "Erreur serveur." });
+  }
+};
+
+exports.deleteComment = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleted = await Comment.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Commentaire non trouvé" });
+    }
+    res.json({ message: "Commentaire supprimé" });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+};
